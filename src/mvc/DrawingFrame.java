@@ -32,6 +32,7 @@ import javax.swing.JToggleButton;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import geometry.Point;
+import mvc.toolbars.ShapesToolbar;
 
 public class DrawingFrame extends JFrame {
 	
@@ -60,17 +61,10 @@ public class DrawingFrame extends JFrame {
 	ImageIcon iconSelect = new ImageIcon("src/resources/iconSelect.png");
 	ImageIcon iconModify = new ImageIcon("src/resources/iconModify.png");
 	ImageIcon iconDelete = new ImageIcon("src/resources/iconDelete.png");
-	ImageIcon iconPoint = new ImageIcon("src/resources/iconDot.png");
-	ImageIcon iconLine = new ImageIcon("src/resources/iconLine.png");
-	ImageIcon iconRectangle = new ImageIcon("src/resources/iconRect.png");
-	ImageIcon iconCircle = new ImageIcon("src/resources/iconCircle.png");
-	ImageIcon iconDonut = new ImageIcon("src/resources/iconDonut.png");
-	ImageIcon iconHexagon = new ImageIcon("src/resources/iconHexagon.png");
+
 	ImageIcon iconNext = new ImageIcon("src/resources/iconNext.png");
 
-	
-	//Paneli
-	private final JPanel leftPanel = new JPanel();
+	private final ShapesToolbar leftPanel = new ShapesToolbar();
 	private final JPanel topPanel = new JPanel();
 	private final JPanel rightPanel = new JPanel();
 	
@@ -83,12 +77,6 @@ public class DrawingFrame extends JFrame {
 	private final JButton btnToFront = new JButton();
 	private final JButton btnBringBack = new JButton();
 	private final JButton btnBringFront = new JButton();
-	private final JToggleButton btnPoint = new JToggleButton();
-	private final JToggleButton btnLine = new JToggleButton();
-	private final JToggleButton btnRectangle = new JToggleButton();
-	private final JToggleButton btnCircle = new JToggleButton();
-	private final JToggleButton btnDonut = new JToggleButton();
-	private final JToggleButton btnHex = new JToggleButton();
 	private JButton btnUndo = new JButton();
 	private JButton btnRedo = new JButton();
 	private final JButton btnInnerColor = new JButton("InnerColor");
@@ -120,12 +108,7 @@ public class DrawingFrame extends JFrame {
 		setupIconBtn(btnModify, iconModify, 50, 50);
 		setupIconBtn(btnDelete, iconDelete, 50, 50);
 		setupIconTlg(btnSelect, iconSelect, 50, 50);
-		setupIconTlg(btnPoint, iconPoint, 50, 50);
-		setupIconTlg(btnLine, iconLine, 70, 70);
-		setupIconTlg(btnRectangle, iconRectangle, 70, 70);
-		setupIconTlg(btnCircle, iconCircle, 50, 50);
-		setupIconTlg(btnDonut, iconDonut, 70, 70);
-		setupIconTlg(btnHex, iconHexagon, 50, 50);
+
 		
 		
 		//Panel layouts
@@ -171,31 +154,7 @@ public class DrawingFrame extends JFrame {
 		//dodavanje btnBringFront
 		tools.add(btnBringFront);
 		topPanel.add(btnBringFront);
-		
-		
-		//dodavnje btnPoint
-		tools.add(btnPoint);
-		leftPanel.add(btnPoint);
-		
-		//dodavanje btnLine
-		tools.add(btnLine);
-		leftPanel.add(btnLine);
-		
-		//dodavanje btnRectangle
-		tools.add(btnRectangle);
-		leftPanel.add(btnRectangle);
-		
-		//dodavnje btnCircle
-		tools.add(btnCircle);
-		leftPanel.add(btnCircle);
-		
-		//dodavanje btnDonut
-		tools.add(btnDonut);
-		leftPanel.add(btnDonut);
-		
-		//dodavnje btnHex
-		tools.add(btnHex);
-		leftPanel.add(btnHex);
+
 		
 		//dodavanje dugmica Undo and Redo
 		topPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
@@ -260,27 +219,27 @@ public class DrawingFrame extends JFrame {
 	}
 	
 	public JToggleButton getBtnPoint() {
-		return btnPoint;
+		return leftPanel.getBtnPoint();
 	}
 	
 	public JToggleButton getBtnLine() {
-		return btnLine;
+		return leftPanel.getBtnLine();
 	}
 	
 	public JToggleButton getBtnRectangle() {
-		return btnRectangle;
+		return leftPanel.getBtnRectangle();
 	}
 	
 	public JToggleButton getBtnCircle() {
-		return btnCircle;
+		return leftPanel.getBtnCircle();
 	}
 	
 	public JToggleButton getBtnDonut() {
-		return btnDonut;
+		return leftPanel.getBtnDonut();
 	}
 	
 	public JToggleButton getBtnHex() {
-		return btnHex;
+		return leftPanel.getBtnHex();
 	}
 	
 	private void setupIconBtn(JButton btn, ImageIcon icon, int width, int height) {
