@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="heksagon1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/out/production/DeisgnPatternsSwingProject/heksagon.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
