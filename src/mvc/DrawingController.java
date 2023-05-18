@@ -93,8 +93,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		
 		int x = e.getX();
 		int y = e.getY();
-		Color innerColor = frame.innerColor;
-		Color outerColor = frame.outerColor;
+		Color innerColor = frame.getInnerColor();
+		Color outerColor = frame.getOuterColor();
 		
 		//Komande
 		

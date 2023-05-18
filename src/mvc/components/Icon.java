@@ -1,4 +1,4 @@
-package mvc.toolbars;
+package mvc.components;
 
 import javax.swing.*;
 
