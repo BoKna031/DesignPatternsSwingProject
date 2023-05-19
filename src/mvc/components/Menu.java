@@ -7,7 +7,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class Menu extends JMenuBar {
@@ -22,6 +21,55 @@ public class Menu extends JMenuBar {
         menuFile.add(saveItem);
         setupListeners();
         this.add(menuFile);
+    }
+    private void setupListeners(){
+        saveItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                saveItem();
+            }
+        });
+
+        openItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = createChooserDialog("Open",new FileNameExtensionFilter("bin", "bin", "txt"));
+
+                int userSelection = fileChooser.showOpenDialog(null);
+
+                if(userSelection != JFileChooser.APPROVE_OPTION)
+                    return;
+
+                File fileToLoad = fileChooser.getSelectedFile();
+                String filename = fileToLoad.getName();
+                if(getFileExtension(filename).contentEquals("bin")) {
+                    try {
+                        controller.load(fileToLoad);
+                    } catch (IOException m) {
+                        m.printStackTrace();
+                    } catch (ClassNotFoundException e1) {
+                        e1.printStackTrace();
+                    }
+                } else if (getFileExtension(filename).contentEquals("txt")) {
+                    try {
+                        controller.loadOneByOne(fileToLoad);
+                    } catch (IOException m) {
+                        m.printStackTrace();
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null, "The file is not valid");
+                }
+            }
+
+        });
+    }
+
+    private void saveItem() {
+        JFileChooser fileChooser = createChooserDialog("Save",new FileNameExtensionFilter("Bin", "bin"));
+        int userSelection = fileChooser.showSaveDialog(null);
+
+        if(userSelection != JFileChooser.APPROVE_OPTION)
+            return;
+
+        saveFile(fileChooser.getSelectedFile());
     }
 
     private boolean saveFile(File file){
@@ -60,56 +108,20 @@ public class Menu extends JMenuBar {
             return path;
         }
     }
-    private void setupListeners(){
-        saveItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                //kreiranje Prozora za odabir lokacije
-                JFileChooser fileChooser = new JFileChooser();
-                FileNameExtensionFilter fileFilter = new FileNameExtensionFilter("Bin", "bin");
-                fileChooser.setFileFilter(fileFilter);
 
-                int userSelection = fileChooser.showSaveDialog(null);
+    private JFileChooser createChooserDialog(String dialogName, FileNameExtensionFilter filter) {
+        JFileChooser fileChooser = new JFileChooser();
+        if(filter != null)
+            fileChooser.setFileFilter(filter);
+        if(dialogName != null)
+            fileChooser.setDialogTitle(dialogName);
+        return fileChooser;
+    }
 
-                if(userSelection != JFileChooser.APPROVE_OPTION) return;
-
-                saveFile(fileChooser.getSelectedFile());
-
-            }
-        });
-
-        openItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser c = new JFileChooser();
-                FileNameExtensionFilter f = new FileNameExtensionFilter("bin", "bin", "txt");
-
-                c.setFileFilter(f);
-
-                c.setDialogTitle("Open");
-                int userSelection = c.showOpenDialog(null);
-
-                if(userSelection == JFileChooser.APPROVE_OPTION) {
-                    File fileToLoad = c.getSelectedFile();
-                    String filename = fileToLoad.getPath();
-                    if(filename.substring(filename.lastIndexOf("."), filename.length()).contentEquals(".bin")) {
-                        try {
-                            controller.load(fileToLoad);
-                        } catch (IOException m) {
-                            m.printStackTrace();
-                        } catch (ClassNotFoundException e1) {
-                            e1.printStackTrace();
-                        }
-                    } else if (filename.substring(filename.lastIndexOf("."), filename.length()).contentEquals(".txt")) {
-                        try {
-                            controller.loadOneByOne(fileToLoad);
-                        } catch (IOException m) {
-                            m.printStackTrace();
-                        }
-                    } else {
-                        JOptionPane.showMessageDialog(null, "The file is not valid");
-                    }
-                }
-            }
-        });
+    private String getFileExtension(String filename){
+        if(!filename.contains("."))
+            return "";
+        return filename.substring(filename.indexOf(".") + 1);
     }
 
     public void setController(DrawingController controller){
