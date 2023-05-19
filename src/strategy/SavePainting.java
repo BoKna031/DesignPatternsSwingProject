@@ -10,7 +10,7 @@ import mvc.DrawingModel;
 public class SavePainting implements SaveStrategy {
 	
 	@Override
-	public void save(Object o, File fileToSave) {
+	public void save(Object o, File fileToSave) throws IOException {
 		DrawingModel model = (DrawingModel)o;
 		ObjectOutputStream ous = null;
 		try {

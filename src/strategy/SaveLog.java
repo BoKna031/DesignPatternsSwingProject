@@ -10,16 +10,13 @@ import mvc.DrawingFrame;
 public class SaveLog implements SaveStrategy {
 	
 	@Override
-	public void save(Object o, File fileToSaveLog) {
+	public void save(Object o, File fileToSaveLog) throws IOException {
 		DrawingFrame frame = (DrawingFrame)o;
 		BufferedWriter bf = null;
-		try {
-			bf = new BufferedWriter((new FileWriter(fileToSaveLog.getAbsolutePath())));
-			frame.getLogArea().write(bf);
-			bf.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		bf = new BufferedWriter((new FileWriter(fileToSaveLog.getAbsolutePath())));
+		frame.getLogArea().write(bf);
+		bf.close();
+
 	}
 
 }

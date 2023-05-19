@@ -1,6 +1,7 @@
 package strategy;
 
 import java.io.File;
+import java.io.IOException;
 
 public class SaveManager implements SaveStrategy {
 	private SaveStrategy saveStrategy;
@@ -10,7 +11,7 @@ public class SaveManager implements SaveStrategy {
 	}
 	
 	@Override
-	public void save(Object o, File file) {
+	public void save(Object o, File file) throws IOException {
 		saveStrategy.save(o, file);
 	}
 

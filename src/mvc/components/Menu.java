@@ -7,6 +7,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class Menu extends JMenuBar {
@@ -19,46 +20,60 @@ public class Menu extends JMenuBar {
     public Menu(){
         menuFile.add(openItem);
         menuFile.add(saveItem);
+        setupListeners();
         this.add(menuFile);
     }
 
+    private boolean saveFile(File file){
+        if(!isBinFileNameValid(file.getName())) {
+            JOptionPane.showMessageDialog(null, "File name is not valid");
+            return false;
+        }
+
+        String path = getPathWithoutFileExtension(file.getAbsolutePath());
+
+        File binFile = new File(path + ".bin");
+        File logFile = new File(path + ".txt");
+
+
+        try {
+            controller.save(binFile, logFile);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Unable to save file!");
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean isBinFileNameValid(String filename){
+        String regex = "^[a-zA-Z0-9_-]+(\\.(bin))?$";
+        return filename.matches(regex);
+    }
+
+    private String getPathWithoutFileExtension(String path){
+        int dotIndex = path.indexOf('.');
+        if (dotIndex != -1) {
+            return path.substring(0, dotIndex);
+        } else {
+            return path;
+        }
+    }
     private void setupListeners(){
         saveItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
+                //kreiranje Prozora za odabir lokacije
+                JFileChooser fileChooser = new JFileChooser();
+                FileNameExtensionFilter fileFilter = new FileNameExtensionFilter("Bin", "bin");
+                fileChooser.setFileFilter(fileFilter);
 
-                JFileChooser c = new JFileChooser();
-                FileNameExtensionFilter f = new FileNameExtensionFilter("Bin", "bin");
-                c.setFileFilter(f);
+                int userSelection = fileChooser.showSaveDialog(null);
 
-                int userSelection = c.showSaveDialog(null);
+                if(userSelection != JFileChooser.APPROVE_OPTION) return;
 
-                if(userSelection == JFileChooser.APPROVE_OPTION) {
-                    File fileToSave = c.getSelectedFile();
-                    File fileToSaveLog;
-                    String filePath = fileToSave.getAbsolutePath();
+                saveFile(fileChooser.getSelectedFile());
 
-                    if(!filePath.endsWith(".bin") && !filePath.contains(".")) {
-                        fileToSave = new File(filePath + ".bin");
-                        fileToSaveLog = new File(filePath + ".txt");
-                    }
-
-                    String filename = fileToSave.getPath();
-
-                    if(filename.substring(filename.lastIndexOf("."), filename.length()).contentEquals(".bin")) {
-                        try {
-
-                            filename = fileToSave.getAbsolutePath().substring(0, filename.lastIndexOf(".")) + ".txt";
-                            System.out.println(filename);
-                            fileToSaveLog = new File(filename);
-                            controller.save(fileToSave, fileToSaveLog);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                    } else {
-                        JOptionPane.showMessageDialog(null, "File is not valid");
-                    }
-                }
             }
         });
 
