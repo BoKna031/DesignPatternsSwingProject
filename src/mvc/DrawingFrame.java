@@ -3,21 +3,12 @@ package mvc;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JToggleButton;
+import javax.swing.*;
 
 import geometry.Point;
-import mvc.components.ColorPanel;
-import mvc.components.Menu;
-import mvc.components.ModificationToolbar;
-import mvc.components.ShapesToolbar;
+import mvc.components.*;
 
 public class DrawingFrame extends JFrame {
 	
@@ -28,45 +19,26 @@ public class DrawingFrame extends JFrame {
 	public Point startPoint = null;
 
 	private Menu menu = new Menu();
-	private final ShapesToolbar leftPanel = new ShapesToolbar();
-	private final ModificationToolbar topPanel = new ModificationToolbar(controller);
-	private final ColorPanel rightPanel = new ColorPanel();
-	private final JTextArea logArea = new JTextArea();
-	private final JScrollPane scrollPane = new JScrollPane(logArea);
-	
-	public DrawingFrame() {
-		setJMenuBar(menu);
+	private final ShapesToolbar leftPanel = new ShapesToolbar(new Dimension(110, 200));
+	private final ModificationToolbar topPanel = new ModificationToolbar(null, controller);
+	private final ColorPanel rightPanel = new ColorPanel(new Dimension(120, 200));
 
-		
-		
-		//Panel layouts
-		leftPanel.setLayout(new GridLayout(0, 1, 10, 10));
-		topPanel.setLayout(new FlowLayout()); //iako je podrazumevano
-		rightPanel.setLayout(new GridLayout(0, 1, 3, 3));
-		view = new DrawingView();
-		
-		//velicina panela
-		view.setPreferredSize(new Dimension(800, 600));
-		leftPanel.setPreferredSize(new Dimension(110, 200));
-		rightPanel.setPreferredSize(new Dimension(120, 200));
+	private final LogPanel logPanel = new LogPanel(new Dimension(0, 150));
 
-		
-		
-		//logArea
-		scrollPane.setPreferredSize(new Dimension(0, 150));
-		logArea.setEditable(false);
-		
-		//podesavajne listenera
+	public DrawingFrame(DrawingModel model) {
+
+		this.setJMenuBar(menu);
+		view = new DrawingView(new Dimension(800, 600), model);
+
 		setupListeners();
-		
-		
+
 		//dodavanje panela
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(view, BorderLayout.CENTER);
 		getContentPane().add(leftPanel, BorderLayout.WEST);
 		getContentPane().add(topPanel, BorderLayout.NORTH);
 		getContentPane().add(rightPanel, BorderLayout.EAST);
-		getContentPane().add(scrollPane, BorderLayout.PAGE_END);
+		getContentPane().add(logPanel, BorderLayout.PAGE_END);
 
 	}
 	
@@ -80,42 +52,8 @@ public class DrawingFrame extends JFrame {
 		menu.setController(controller);
 	}
 	
-	public JToggleButton getBtnSelect() {
-		return topPanel.getBtnSelect();
-	}
-	
-	public JButton getBtnModify() {
-		return topPanel.getBtnModify();
-	}
-	
-	public JToggleButton getBtnPoint() {
-		return leftPanel.getBtnPoint();
-	}
-	
-	public JToggleButton getBtnLine() {
-		return leftPanel.getBtnLine();
-	}
-	
-	public JToggleButton getBtnRectangle() {
-		return leftPanel.getBtnRectangle();
-	}
-	
-	public JToggleButton getBtnCircle() {
-		return leftPanel.getBtnCircle();
-	}
-	
-	public JToggleButton getBtnDonut() {
-		return leftPanel.getBtnDonut();
-	}
-	
-	public JToggleButton getBtnHex() {
-		return leftPanel.getBtnHex();
-	}
-	
 	private void setupListeners() {
-		
-		
-		//View
+
 		view.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -138,7 +76,15 @@ public class DrawingFrame extends JFrame {
 	}
 	
 	public JTextArea getLogArea() {
-		return logArea;
+		return logPanel.getLogArea();
+	}
+
+	public void appendLog(String log){
+		logPanel.addLog(log);
+	}
+
+	public void clearLogArea(){
+		logPanel.clearLogArea();
 	}
 	
 	public JButton getBtnToBack() {
@@ -166,5 +112,37 @@ public class DrawingFrame extends JFrame {
 	}
 	public Color getOuterColor(){
 		return rightPanel.getOuterColor();
+	}
+
+	public JToggleButton getBtnSelect() {
+		return topPanel.getBtnSelect();
+	}
+
+	public JButton getBtnModify() {
+		return topPanel.getBtnModify();
+	}
+
+	public JToggleButton getBtnPoint() {
+		return leftPanel.getBtnPoint();
+	}
+
+	public JToggleButton getBtnLine() {
+		return leftPanel.getBtnLine();
+	}
+
+	public JToggleButton getBtnRectangle() {
+		return leftPanel.getBtnRectangle();
+	}
+
+	public JToggleButton getBtnCircle() {
+		return leftPanel.getBtnCircle();
+	}
+
+	public JToggleButton getBtnDonut() {
+		return leftPanel.getBtnDonut();
+	}
+
+	public JToggleButton getBtnHex() {
+		return leftPanel.getBtnHex();
 	}
 }

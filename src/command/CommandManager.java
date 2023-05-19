@@ -3,8 +3,6 @@ package command;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
-
-import geometry.Shape;
 import mvc.DrawingFrame;
 
 public class CommandManager {
@@ -15,7 +13,6 @@ public class CommandManager {
 	private DrawingFrame frame;
 	
 	private List<String> commandHistory;
-	private List<Shape> shapes = new ArrayList<Shape>();
 	
 	public static CommandManager getInstance() {
 		if(instance == null)
@@ -37,7 +34,7 @@ public class CommandManager {
 		stackReverse.clear();
 		
 		//logging
-		frame.getLogArea().append(command.getName()+"\n");
+		frame.appendLog(command.getName());
 	}
 	
 	public void undo() {
@@ -48,7 +45,7 @@ public class CommandManager {
 			command.unexecute();
 			
 		//logging
-		frame.getLogArea().append(command.getName() + " - Undo\n");
+		frame.appendLog(command.getName() + " - Undo");
 			
 		}
 	}
@@ -61,7 +58,7 @@ public class CommandManager {
 			command.execute();
 			
 			//logging
-			frame.getLogArea().append(command.getName()+ " - Redo\n"); 
+			frame.appendLog(command.getName()+ " - Redo");
 		}
 	}
 	
@@ -71,10 +68,6 @@ public class CommandManager {
 	
 	public void clearReverse() {
 		stackReverse.clear();
-	}
-	
-	public List<String> getActionHistory() {
-		return commandHistory;
 	}
 	
 	public int sizeNormal() {

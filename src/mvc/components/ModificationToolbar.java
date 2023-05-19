@@ -22,7 +22,7 @@ public class ModificationToolbar extends JPanel implements ActionListener {
 
     private DrawingController controller;
 
-    public ModificationToolbar(DrawingController controller){
+    public ModificationToolbar(Dimension dimension, DrawingController controller){
         this.controller = controller;
         btnNext = createButton(Icon.Next, 50, 50, false);
         btnSelect = createToggleButton(Icon.Select, 50, 50, true);
@@ -36,6 +36,11 @@ public class ModificationToolbar extends JPanel implements ActionListener {
         btnUndo = createButton(Icon.Undo, 50, 50, false);
         btnRedo = createButton(Icon.Redo, 50, 50, false);
         createActionListener();
+
+        if(dimension != null)
+            this.setPreferredSize(dimension);
+
+        this.setLayout(new FlowLayout());
     }
 
     private JButton createButton(ImageIcon icon, int width, int height, boolean isEnabled) {

@@ -14,7 +14,7 @@ public class ShapesToolbar extends JPanel {
     private final ButtonGroup buttons;
 
 
-    public ShapesToolbar(){
+    public ShapesToolbar(Dimension dimension){
         buttons = new ButtonGroup();
         btnPoint = createToggleButton(Icon.Point, 50, 50);
         btnLine = createToggleButton(Icon.Line, 50, 50);
@@ -22,6 +22,11 @@ public class ShapesToolbar extends JPanel {
         btnCircle = createToggleButton(Icon.Circle, 50, 50);
         btnDonut = createToggleButton(Icon.Donut, 70, 70);
         btnHex = createToggleButton(Icon.Hexagon, 50, 50);
+
+        if(dimension != null)
+            this.setPreferredSize(dimension);
+
+        this.setLayout(new GridLayout(0, 1, 10, 10));
     }
 
     private JToggleButton createToggleButton(ImageIcon icon, int width, int height) {
