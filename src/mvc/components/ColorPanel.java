@@ -2,48 +2,26 @@ package mvc.components;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
-public class ColorPanel extends JPanel implements ActionListener {
+public class ColorPanel extends JPanel {
 
-    private Color innerColor;
-    private Color outerColor;
-
-
-    private final JButton btnInnerColor = new JButton("InnerColor");
-    private final JButton btnOuterColor = new JButton("OuterColor");
-
+    private final ColorButton innerColorBtn;
+    private final ColorButton outerColorBtn;
 
     public ColorPanel(){
-        innerColor = outerColor = Color.RED;
+        innerColorBtn = new ColorButton(Color.RED, "Inner color");
+        outerColorBtn = new ColorButton(Color.RED, "Outer color");
 
-        btnInnerColor.setBackground(innerColor);
-        btnOuterColor.setBackground(outerColor);
-
-        this.add(btnInnerColor);
-        this.add(btnOuterColor);
-
-        btnOuterColor.addActionListener(this);
-        btnInnerColor.addActionListener(this);
+        this.add(innerColorBtn);
+        this.add(outerColorBtn);
     }
 
     public Color getInnerColor() {
-        return innerColor;
+        return innerColorBtn.getColor();
     }
 
     public Color getOuterColor() {
-        return outerColor;
+        return outerColorBtn.getColor();
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if(e.getSource() == btnInnerColor) {
-            innerColor = JColorChooser.showDialog(this, "Choose your inner color", innerColor);
-            btnInnerColor.setBackground(innerColor);
-        } else if (e.getSource() == btnOuterColor) {
-            outerColor = JColorChooser.showDialog(this, "Choose your outer color", outerColor);
-            btnOuterColor.setBackground(outerColor);
-        }
-    }
 }
