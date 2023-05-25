@@ -31,7 +31,7 @@ import dialogs.DlgDonut;
 import dialogs.DlgHexagon;
 import dialogs.DlgLine;
 import dialogs.DlgPoint;
-import dialogs.DlgRectangle;
+import dialogs.RectangleDialog;
 import geometry.Circle;
 import geometry.Donut;
 import geometry.HexagonAdapter;
@@ -563,10 +563,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 	
 	private Rectangle rectDialog(int x, int y, int height, int width, Color innerColor, Color outerColor,
 			boolean editable) throws Exception {
-
-		DlgRectangle dlg = new DlgRectangle(x, y, innerColor, outerColor);
-		dlg.getTextFieldX().setEditable(editable);
-		dlg.getTextFieldY().setEditable(editable);
+		Rectangle rectangle = new Rectangle(new Point(x, y, innerColor), width, height, innerColor, outerColor);
+		RectangleDialog dlg = new RectangleDialog(rectangle, editable);
 		if (editable) {
 			dlg.getTextFieldHeight().setText(String.valueOf(height));
 			dlg.getTextFieldWidth().setText(String.valueOf(width));
