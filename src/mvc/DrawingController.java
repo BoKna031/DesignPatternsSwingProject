@@ -8,9 +8,6 @@ import java.awt.event.MouseEvent;
 import java.io.*;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 

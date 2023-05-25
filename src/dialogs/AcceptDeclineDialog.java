@@ -6,11 +6,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 public abstract class AcceptDeclineDialog extends JDialog {
     private boolean accepted;
-    private JPanel buttonsPanel;
+
     public AcceptDeclineDialog(){
         accepted = false;
         setPreferredSize(new Dimension(300,300));
-        buttonsPanel = createButtonPanel();
+        JPanel buttonsPanel = createButtonPanel();
 
         setLayout(new BorderLayout());
         add(buttonsPanel,BorderLayout.PAGE_END);

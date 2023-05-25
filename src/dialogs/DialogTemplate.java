@@ -6,9 +6,9 @@ import java.util.ArrayList;
 
 public class DialogTemplate extends AcceptDeclineDialog{
     private class ComponentTemplate{
-        private String key;
-        private JLabel label;
-        private JComponent component;
+        private final String key;
+        private final JLabel label;
+        private final JComponent component;
 
         public ComponentTemplate(String key, String label, JComponent component) {
             this.key = key;

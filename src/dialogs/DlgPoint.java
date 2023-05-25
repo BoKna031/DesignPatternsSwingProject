@@ -12,8 +12,8 @@ import javax.swing.JTextField;
 
 public class DlgPoint extends DialogTemplate{
 
-	private Point point;
-	private boolean editable;
+	private final Point point;
+	private final boolean editable;
 	
 	public DlgPoint(Point point, boolean editable) {
 		this.point = point;
