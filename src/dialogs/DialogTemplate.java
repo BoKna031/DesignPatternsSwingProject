@@ -6,12 +6,10 @@ import java.util.ArrayList;
 
 public class DialogTemplate extends AcceptDeclineDialog{
     private class ComponentTemplate{
-        private final String key;
         private final JLabel label;
         private final JComponent component;
 
-        public ComponentTemplate(String key, String label, JComponent component) {
-            this.key = key;
+        public ComponentTemplate(String label, JComponent component) {
             this.label = new JLabel(label);
             this.component = component;
         }
@@ -19,13 +17,13 @@ public class DialogTemplate extends AcceptDeclineDialog{
 
     private ArrayList<ComponentTemplate> components = new ArrayList<>();
 
-    public void addComponent(String label, JComponent component, String key){
-        components.add(new ComponentTemplate(key, label, component));
+    public void addComponent(String label, JComponent component){
+        components.add(new ComponentTemplate(label, component));
         updateContentPanel();
     }
 
-    public void addComponent(int index, String label, JComponent component, String key){
-        components.add(index, new ComponentTemplate(key, label, component));
+    public void addComponent(int index, String label, JComponent component){
+        components.add(index, new ComponentTemplate(label, component));
         updateContentPanel();
     }
 
@@ -37,28 +35,5 @@ public class DialogTemplate extends AcceptDeclineDialog{
             contentPanel.add(ct.component);
         }
         addContentPanel(contentPanel);
-    }
-
-    public JComponent getComponentByKey(String key){
-        ComponentTemplate ct = findByKey(key);
-        if(ct != null)
-            return ct.component;
-        return null;
-    }
-
-    public JLabel getLabelByKey(String key){
-        ComponentTemplate ct = findByKey(key);
-        if(ct != null){
-            return ct.label;
-        }
-        return null;
-    }
-
-    private ComponentTemplate findByKey(String key){
-        for(ComponentTemplate ct : components){
-            if(ct.key.equals(key))
-                return ct;
-        }
-        return null;
     }
 }

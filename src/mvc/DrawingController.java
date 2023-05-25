@@ -30,7 +30,7 @@ import dialogs.DlgCircle;
 import dialogs.DlgDonut;
 import dialogs.DlgHexagon;
 import dialogs.DlgLine;
-import dialogs.DlgPoint;
+import dialogs.PointDialog;
 import dialogs.RectangleDialog;
 import geometry.Circle;
 import geometry.Donut;
@@ -525,7 +525,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 	
 	private Point pointDialog(int x, int y, Color outerColor, boolean editable) {
 		Point p = new Point(x,y, outerColor);
-		DlgPoint dlg = new DlgPoint(p, editable);
+		PointDialog dlg = new PointDialog(p, editable);
 		dlg.setVisible(true);
 		
 		if(dlg.isAccepted()) {

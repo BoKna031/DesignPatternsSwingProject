@@ -51,6 +51,8 @@ public class RectangleDialog extends DialogTemplate implements ActionListener, K
 
 		x_cord.setEditable(editable);
 		y_cord.setEditable(editable);
+		x_cord.addKeyListener(this);
+		y_cord.addKeyListener(this);
 
 		btnInnerColor.setBackground(rectangle.getInnerColor());
 		btnInnerColor.addActionListener(this);
@@ -60,12 +62,12 @@ public class RectangleDialog extends DialogTemplate implements ActionListener, K
 	}
 
 	private void createContentPanel() {
-		addComponent("X Cordinate: ", x_cord, "x_cord");
-		addComponent("Y Cordinate: ", y_cord, "y_cord");
-		addComponent("Width:",width, "width");
-		addComponent("Height:",height, "height");
-		addComponent("Inner Color", btnInnerColor, "inner_color");
-		addComponent("Outer Color", btnOuterColor,"outer_color");
+		addComponent("X Cordinate: ", x_cord);
+		addComponent("Y Cordinate: ", y_cord);
+		addComponent("Width:",width);
+		addComponent("Height:",height);
+		addComponent("Inner Color", btnInnerColor);
+		addComponent("Outer Color", btnOuterColor);
 	}
 
 	@Override
