@@ -527,16 +527,14 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 	//Metode za dijaloge
 	
 	private Point pointDialog(int x, int y, Color outerColor, boolean editable) {
-		
-		DlgPoint dlg = new DlgPoint(x, y, outerColor);
-		dlg.getTextFieldX().setEditable(editable);
-		dlg.getTextFieldY().setEditable(editable);
+		Point p = new Point(x,y, outerColor);
+		DlgPoint dlg = new DlgPoint(p, editable);
 		dlg.setVisible(true);
 		
 		if(dlg.isAccepted()) {
-			x = Integer.parseInt(dlg.getTextFieldX().getText());
-			y = Integer.parseInt(dlg.getTextFieldY().getText());
-			outerColor = dlg.getBtnColor().getBackground();
+			x = Integer.parseInt(dlg.getTextFieldX());
+			y = Integer.parseInt(dlg.getTextFieldY());
+			outerColor = dlg.getBtnColor();
 			return new Point(x, y, outerColor);
 		}
 		
