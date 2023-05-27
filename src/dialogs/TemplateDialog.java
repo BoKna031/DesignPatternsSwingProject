@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class DialogTemplate extends AcceptDeclineDialog{
+public class TemplateDialog extends AcceptDeclineDialog{
     private class ComponentTemplate{
         private final JLabel label;
         private final JComponent component;

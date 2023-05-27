@@ -1,8 +1,8 @@
 package dialogs;
 
-import geometry.Point;
+import geometry.Line;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -12,54 +12,63 @@ import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JTextField;
 
-public class PointDialog extends TemplateDialog implements ActionListener, KeyListener {
+public class LineDialog extends TemplateDialog implements ActionListener, KeyListener {
+
 	private JTextField textFieldX;
 	private JTextField textFieldY;
-
+	private JTextField textFieldX2;
+	private JTextField textFieldY2;
 	private JButton btnColor;
-
 	private final boolean editable;
-	
-	public PointDialog(Point point, boolean editable) {
+
+	public LineDialog(Line line, boolean editable) {
 		this.editable = editable;
-		setTitle("Point Dialog");
+		setTitle("Line Dialog");
 		setSize(300, 300);
 		setLocationRelativeTo(null);
 		setModal(true);
 
-		createComponents(point);
+		createComponents(line);
 		createContentPanel();
 	}
 
-	private void createComponents(Point point) {
-		textFieldX = new JTextField(Integer.toString(point.getX()));
+	private void createComponents(Line line) {
+		textFieldX = new JTextField(Integer.toString(line.getStartPoint().getX()));
 		textFieldX.setEditable(editable);
 		textFieldX.addKeyListener(this);
 
-		textFieldY = new JTextField(Integer.toString(point.getY()));
+		textFieldY = new JTextField(Integer.toString(line.getStartPoint().getY()));
 		textFieldY.setEditable(editable);
 		textFieldY.addKeyListener(this);
 
+		textFieldX2 = new JTextField(Integer.toString(line.getEndPoint().getX()));
+		textFieldX2.setEditable(editable);
+		textFieldX2.addKeyListener(this);
+
+		textFieldY2 = new JTextField(Integer.toString(line.getEndPoint().getY()));
+		textFieldY2.setEditable(editable);
+		textFieldY2.addKeyListener(this);
+
 		btnColor = new JButton("");
-		btnColor.setBackground(point.getColor());
+		btnColor.setBackground(line.getColor());
 		btnColor.addActionListener(this);
 	}
-
 
 	private void createContentPanel(){
 		addComponent("X Cordinate: ", textFieldX);
 		addComponent("Y Cordinate: ", textFieldY);
+		addComponent("X2 Cordinate: ", textFieldX2);
+		addComponent("Y2 Cordinate: ", textFieldY2);
 		addComponent("Color: ", btnColor);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == btnColor) {
-			Color outerColor = JColorChooser.showDialog(this, "Choose your outer color", btnColor.getBackground());
-			btnColor.setBackground(outerColor);
+			Color color = JColorChooser.showDialog(this, "Odaberite svoju boju", Color.RED);
+			btnColor.setBackground(color);
 		}
 	}
-
 	@Override
 	public void keyTyped(KeyEvent e) {
 		char c = e.getKeyChar();
@@ -67,26 +76,27 @@ public class PointDialog extends TemplateDialog implements ActionListener, KeyLi
 			getToolkit().beep();
 			e.consume();
 		}
-
 	}
-
 	public String getTextFieldX() {
 		return textFieldX.getText();
 	}
 	public String getTextFieldY() {
-		return textFieldY.getText() ;
+		return textFieldY.getText();
+	}
+	public String getTextFieldX2() {
+		return textFieldX2.getText();
+	}
+	public String getTextFieldY2() {
+		return textFieldY2.getText();
 	}
 	public Color getBtnColor() {
 		return btnColor.getBackground();
 	}
+	@Override
+	public void keyPressed(KeyEvent e) {}
 
 	@Override
-	public void keyPressed(KeyEvent e) {
+	public void keyReleased(KeyEvent e) {}
 
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e) {
-
-	}
 }
+

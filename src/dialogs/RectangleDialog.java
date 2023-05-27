@@ -12,7 +12,7 @@ import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JTextField;
 
-public class RectangleDialog extends DialogTemplate implements ActionListener, KeyListener{
+public class RectangleDialog extends TemplateDialog implements ActionListener, KeyListener{
 	private JTextField x_cord;
 	private JTextField y_cord;
 

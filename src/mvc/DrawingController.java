@@ -26,10 +26,10 @@ import command.commands.RectangleModify;
 import command.commands.CmdSelect;
 import command.commands.CmdToBack;
 import command.commands.CmdToFront;
-import dialogs.DlgCircle;
-import dialogs.DlgDonut;
-import dialogs.DlgHexagon;
-import dialogs.DlgLine;
+import dialogs.CircleDialog;
+import dialogs.DonutDialog;
+import dialogs.HexagonDialog;
+import dialogs.LineDialog;
 import dialogs.PointDialog;
 import dialogs.RectangleDialog;
 import geometry.Circle;
@@ -539,25 +539,20 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 	}
 	
 	private Line lineDialog(int x1, int y1, int x2, int y2, Color outerColor, boolean editable) {
-		
-		DlgLine dlg = new DlgLine(x1, y1, x2, y2, outerColor);
-		dlg.getTextFieldX().setEditable(editable);
-		dlg.getTextFieldY().setEditable(editable);
-		dlg.getTextFieldX2().setEditable(editable);
-		dlg.getTextFieldY2().setEditable(editable);
+
+		Line line = new Line(new Point(x1, y1), new Point(x2, y2), outerColor);
+		LineDialog dlg = new LineDialog(line, editable);;
 		dlg.setVisible(true);
-		
+
 		if (dlg.isAccepted()) {
-			x1 = Integer.parseInt(dlg.getTextFieldX().getText());
-			y1 = Integer.parseInt(dlg.getTextFieldY().getText());
-			x2 = Integer.parseInt(dlg.getTextFieldX2().getText());
-			y2 = Integer.parseInt(dlg.getTextFieldY2().getText());
-			outerColor = dlg.getBtnColor().getBackground();
-			Point p1 = new Point(x1, y1);
-			Point p2 = new Point(x2, y2);
-			return new Line(p1, p2, outerColor);
+			x1 = Integer.parseInt(dlg.getTextFieldX());
+			y1 = Integer.parseInt(dlg.getTextFieldY());
+			x2 = Integer.parseInt(dlg.getTextFieldX2());
+			y2 = Integer.parseInt(dlg.getTextFieldY2());
+			outerColor = dlg.getBtnColor();
+			return new Line(new Point(x1, y1), new Point(x2, y2), outerColor);
 		}
-		
+
 		return null;
 	}
 	
@@ -589,52 +584,41 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 	private Circle circleDialog(int x, int y, int radius, Color innerColor, Color outerColor, boolean editable)
 			throws Exception {
 
-		DlgCircle dlg = new DlgCircle(x, y, innerColor, outerColor);
+		Circle circle = new Circle(new Point(x, y), radius, innerColor, outerColor);
+		CircleDialog dlg = new CircleDialog(circle, editable);
 		if (editable)
 			dlg.getTextFieldRadius().setText(String.valueOf(radius));
-		dlg.getTxtXCoordinate().setEditable(editable);
-		dlg.getTxtYCoordinate().setEditable(editable);
-
-		dlg.setVisible(true);
-
-		if (dlg.isAccepted()) {
-
-			x = Integer.parseInt(dlg.getTxtXCoordinate().getText());
-			y = Integer.parseInt(dlg.getTxtYCoordinate().getText());
-
-			Point p = new Point(x, y);
-
-			radius = Integer.parseInt(dlg.getTextFieldRadius().getText());
-			innerColor = dlg.getBtnFillColor().getBackground();
-			outerColor = dlg.getBtnEdgeColor().getBackground();
-
-			return new Circle(p, radius, innerColor, outerColor);
-		}
-
-		return null;
-	}
-	
-	private Donut donutDialog(int x, int y, int innerRadius, int outerRadius, Color innerColor, Color outerColor,
-			boolean editable) throws Exception {
-
-		DlgDonut dlg = new DlgDonut(x, y, innerColor, outerColor);
-		if (editable) {
-			dlg.getTextFieldInRadius().setText(String.valueOf(innerRadius));
-			dlg.getTextFieldOutRadius().setText(String.valueOf(outerRadius));
-		}
-		dlg.getTextFieldX().setEditable(editable);
-		dlg.getTextFieldY().setEditable(editable);
-
 		dlg.setVisible(true);
 
 		if (dlg.isAccepted()) {
 
 			x = Integer.parseInt(dlg.getTextFieldX().getText());
 			y = Integer.parseInt(dlg.getTextFieldY().getText());
-			Point p = new Point(x, y);
+			radius = Integer.parseInt(dlg.getTextFieldRadius().getText());
+			innerColor = dlg.getBtnInnerColor().getBackground();
+			outerColor = dlg.getBtnOuterColor().getBackground();
+			return new Circle(new Point(x, y), radius, innerColor, outerColor);
+		}
+		return null;
+	}
+	
+	private Donut donutDialog(int x, int y, int innerRadius, int outerRadius, Color innerColor, Color outerColor,
+			boolean editable) throws Exception {
+
+		Donut donut = new Donut(new Point(x, y), innerRadius, outerRadius, innerColor, outerColor);
+		DonutDialog dlg = new DonutDialog(donut, editable);
+		if (editable) {
+			dlg.getTextFieldInRadius().setText(String.valueOf(innerRadius));
+			dlg.getTextFieldOutRadius().setText(String.valueOf(outerRadius));
+		}
+		dlg.setVisible(true);
+
+		if (dlg.isAccepted()) {
+
+			x = Integer.parseInt(dlg.getTextFieldX().getText());
+			y = Integer.parseInt(dlg.getTextFieldY().getText());
 			innerRadius = Integer.parseInt(dlg.getTextFieldInRadius().getText());
 			outerRadius = Integer.parseInt(dlg.getTextFieldOutRadius().getText());
-
 			innerColor = dlg.getBtnInnerColor().getBackground();
 			outerColor = dlg.getBtnOuterColor().getBackground();
 			if(innerRadius == 0)
@@ -642,35 +626,32 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 			else if (innerRadius >= outerRadius)
 				JOptionPane.showMessageDialog(new JFrame(), "Outer radius must be greater than inner radius","Error", JOptionPane.WARNING_MESSAGE);
 			else
-			    return new Donut(p, innerRadius, outerRadius, innerColor, outerColor);
+				return new Donut(new Point(x, y), innerRadius, outerRadius, innerColor, outerColor);
 		}
-
 		return null;
 	}
 	
-	private HexagonAdapter hexDialog(int x, int y, int r, Color innerColor, Color outerColor, boolean editable) {
-		
-		DlgHexagon dlg = new DlgHexagon(x, y, innerColor, outerColor);
-		
+	private HexagonAdapter hexDialog(int x, int y, int radius, Color innerColor, Color outerColor, boolean editable) {
+
+		HexagonAdapter hexagon = new HexagonAdapter(x, y, radius, innerColor, outerColor);
+		HexagonDialog dlg = new HexagonDialog(hexagon, editable);
+
 		if (editable) {
-			dlg.getTextFieldRadius().setText(String.valueOf(r));
+			dlg.getTextFieldRadius().setText(String.valueOf(radius));
 		}
-		dlg.getTextFieldX().setEditable(editable);
-		dlg.getTextFieldY().setEditable(editable);
-		
 		dlg.setVisible(true);
-		
+
 		if (dlg.isAccepted()) {
-			
+
 			x = Integer.parseInt(dlg.getTextFieldX().getText());
 			y = Integer.parseInt(dlg.getTextFieldY().getText());
-			r = Integer.parseInt(dlg.getTextFieldRadius().getText());
+			radius = Integer.parseInt(dlg.getTextFieldRadius().getText());
 			innerColor = dlg.getBtnInnerColor().getBackground();
 			outerColor = dlg.getBtnOuterColor().getBackground();
-			
-			return new HexagonAdapter(x, y, r, innerColor, outerColor);
+
+			return new HexagonAdapter(x, y, radius, innerColor, outerColor);
 		}
-		
+
 		return null;
 	}
 	
