@@ -39,6 +39,7 @@ import geometry.Point;
 import geometry.Rectangle;
 import geometry.Shape;
 import model.service.IShapeService;
+import model.service.ShapeService;
 import observer.Observer;
 import observer.ObserverUpdate;
 import observer.SelectedObjects;
@@ -52,20 +53,13 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 	private IShapeService shapeService;
 	private SelectedObjects selectedObjects = new SelectedObjects();
 	CommandManager commandManager = CommandManager.getInstance();
-	ArrayList<String> txtFileLines = new ArrayList<>();
+	ArrayList<String> temporarilyLogs = new ArrayList<>();
 	int i = 0;
 	
 	
 	ObserverUpdate observerUpdate;
 	Observer observer =  new Observer();
-	
-	//Brojaic
-	int pointerCount = 1;
-	int lineCount = 1;
-	int rectangleCount = 1;
-	int circleCount = 1;
-	int donutCount = 1;
-	int hexagonCount = 1;
+
 	
 	public DrawingController(DrawingModel model, DrawingFrame frame, IShapeService shapeService) {
 		this.shapeService = shapeService;
@@ -121,11 +115,12 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 			try {
 					Point point = pointDialog(x, y, outerColor, false);
 					if (point != null) {
-						point.setNameString("Point" + pointerCount++ + "," + point.toString() + ",color," + String.valueOf(point.getColor().getRGB()));
+						Shape newShape = shapeService.create(point);
+						point.setNameString(newShape.getId() + "," + point + ",color," + point.getColor().getRGB());
 						
 						CmdAdd cmd = new CmdAdd(model, point, point.getName() + " - Add");
 						commandManager.execute(cmd);
-						shapeService.create(point);
+
 						frame.getBtnUndo().setEnabled(true);
 						frame.getBtnRedo().setEnabled(false);
 					}
@@ -143,10 +138,11 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				try {
 					Line line = lineDialog(frame.startPoint.getX(), frame.startPoint.getY(), x, y, outerColor, false);
 					if (line != null) {
-						line.setNameString("Line" + lineCount++ + "," + line.toString());
+						Shape newShape = shapeService.create(line);
+						line.setNameString(newShape.getId() + "," + line);
 						CmdAdd cmd = new CmdAdd(model, line, line.getName() + " - Add");
 						commandManager.execute(cmd);
-						shapeService.create(line);
+
 						frame.getBtnUndo().setEnabled(true);
 						frame.getBtnRedo().setEnabled(false);
 					}
@@ -165,10 +161,10 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 
 				Rectangle rect = rectDialog(x, y, 0, 0, innerColor, outerColor, false);
 				if (rect != null) {
-					rect.setNameString("Rectangle" + rectangleCount++ + "," + rect.toString());
+					Shape newShape = shapeService.create(rect);
+					rect.setNameString(newShape.getId() + "," + rect);
 					CmdAdd cmd = new CmdAdd(model, rect, rect.getName() + " - Add");
 					commandManager.execute(cmd);
-					shapeService.create(rect);
 					frame.getBtnUndo().setEnabled(true);
 					frame.getBtnRedo().setEnabled(false);
 				}
@@ -184,10 +180,11 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				Circle circle = circleDialog(x, y, 0, innerColor, outerColor, false);
 
 				if (circle != null) {
-					circle.setNameString("Circle" + circleCount++ + "," + circle.toString());
+
+					Shape newShape = shapeService.create(circle);
+					circle.setNameString(newShape.getId() + "," + circle);
 					CmdAdd cmd = new CmdAdd(model, circle, circle.getName() + " - Add");
 					commandManager.execute(cmd);
-					shapeService.create(circle);
 					frame.getBtnUndo().setEnabled(true);
 					frame.getBtnRedo().setEnabled(false);
 				}
@@ -204,10 +201,10 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 			try {
 				Donut donut = donutDialog(x, y, 0, 0, innerColor, outerColor, false);
 				if (donut != null) {
-					donut.setNameString("Donut" + donutCount++ + "," + donut.toString());
+					Shape newShape = shapeService.create(donut);
+					donut.setNameString(newShape.getId() + "," + donut);
 					CmdAdd cmd = new CmdAdd(model, donut, donut.getName() + " - Add");
 					commandManager.execute(cmd);
-					shapeService.create(donut);
 					frame.getBtnUndo().setEnabled(true);
 					frame.getBtnRedo().setEnabled(false);
 				}
@@ -224,11 +221,10 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				
 				HexagonAdapter hex = hexDialog(x, y, 0, innerColor, outerColor, false);
 				if(hex != null) {
-					
-					hex.setNameString("Hexagon" + hexagonCount++ + "," + hex.toString());
+					Shape newShape = shapeService.create(hex);
+					hex.setNameString(newShape.getId() + "," + hex);
 					CmdAdd cmd = new CmdAdd(model, hex, hex.getName() + " - Add");
 					commandManager.execute(cmd);
-					shapeService.create(hex);
 					frame.getBtnUndo().setEnabled(true);
 					frame.getBtnRedo().setEnabled(false);
 				}
@@ -352,15 +348,13 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 								c.getInnerColor(), c.getOuterColor(), true);
 						if (circle != null) {
 							circle.setSelected(true);
+							circle.setId(c.getId());
+							circle.setNameString(circle.getId() + "," + circle);
 
-							String[] attributes = c.getName().split(",");
-							String name = attributes[0];
-							circle.setNameString(name + "," + circle.toString());
-							int index = model.getShapes().indexOf(shape);
-
-							CircleModify circleModify = new CircleModify(model, c, circle, index,
-									c.getName() + ",Modify to," + circle.getName(), selectedObjects);
+							CircleModify circleModify = new CircleModify(shapeService, c, circle, selectedObjects);
 							commandManager.execute(circleModify);
+							model.getShapes().clear();
+							model.getShapes().addAll(shapeService.getAll());
 
 							frame.getBtnUndo().setEnabled(true);
 							frame.getBtnRedo().setEnabled(false);
@@ -716,7 +710,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 			}
 	}
 	
-	public void loadOneByOne(File fileToLoad) throws IOException {
+	public void loadOneByOne(File file) throws IOException {
 		
 		frame.getBtnNext().setEnabled(true);
 		frame.getBtnUndo().setEnabled(false);
@@ -728,32 +722,23 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		commandManager.clearReverse();
 		notifyAllObservers(0);
 		frame.clearLogArea();
-		txtFileLines.clear();
+		temporarilyLogs.clear();
 		
 		frame.repaint();
-		
-		//Reset brojaca
-		i = 0;
-		pointerCount = 1;
-		lineCount = 1;
-		rectangleCount = 1;
-		circleCount = 1;
-		donutCount = 1;
-		hexagonCount = 1;
-		
-		BufferedReader br = new BufferedReader(new FileReader(fileToLoad));
-		String line;
-		
-		while ((line = br.readLine()) != null) {
-			txtFileLines.add(line);
+
+		try {
+			ShapeService tempService = new ShapeService();
+			tempService.readFromFile(file);
+
+			temporarilyLogs = (ArrayList<String>) tempService.getAllLogs();
+		}catch (IOException | ClassNotFoundException e){
+			e.printStackTrace();
 		}
-		
-		br.close();
 	}
 	
 	public void loadNext() throws Exception {
 		
-		String line = txtFileLines.get(i);
+		String line = temporarilyLogs.get(i);
 		Shape shape = null;
 		
 		if (line.contains("Undo")) {
@@ -818,7 +803,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				
 				Point point = new Point(x, y, color);
 				
-				point.setNameString("Point" + pointerCount++ + "," + point.toString() + ",color," + String.valueOf(point.getColor().getRGB()));
+				//point.setNameString("Point" + pointerCount++ + "," + point.toString() + ",color," + String.valueOf(point.getColor().getRGB()));
 				
 				CmdAdd cmd = new CmdAdd(model, point, point.getName() + " - Add");
 				commandManager.execute(cmd);
@@ -841,7 +826,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				
 				Line lineObject = new Line(startPoint, endPoint, color);
 				
-				lineObject.setNameString("Line" + lineCount++ + "," + lineObject.toString());
+				//lineObject.setNameString("Line" + lineCount++ + "," + lineObject.toString());
 				
 				CmdAdd cmd =  new CmdAdd(model, lineObject, lineObject.getName() + " - Add");
 				commandManager.execute(cmd);
@@ -862,7 +847,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 
 				Rectangle rect = new Rectangle(upperLeftPoint, width, height, innerColor, outerColor);
 
-				rect.setNameString("Rectangle" + rectangleCount++ + "," + rect.toString());
+				//rect.setNameString("Rectangle" + rectangleCount++ + "," + rect.toString());
 				CmdAdd cmd = new CmdAdd(model, rect, rect.getName() + " - Add");
 				commandManager.execute(cmd);
 				frame.getBtnUndo().setEnabled(true);
@@ -881,7 +866,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 
 				Circle circle = new Circle(center, radius, innerColor, outerColor);
 
-				circle.setNameString("Circle" + circleCount++ + "," + circle.toString());
+				//circle.setNameString("Circle" + circleCount++ + "," + circle.toString());
 				CmdAdd cmd = new CmdAdd(model, circle, circle.getName() + " - Add");
 				commandManager.execute(cmd);
 				frame.getBtnUndo().setEnabled(true);
@@ -901,7 +886,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 
 				Donut donut = new Donut(center, innerRadius, radius, innerColor, outerColor);
 
-				donut.setNameString("Donut" + donutCount++ + "," + donut.toString());
+				//donut.setNameString("Donut" + donutCount++ + "," + donut.toString());
 				CmdAdd cmd = new CmdAdd(model, donut, donut.getName() + " - Add");
 				commandManager.execute(cmd);
 				frame.getBtnUndo().setEnabled(true);
@@ -920,7 +905,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 
 				HexagonAdapter hex = new HexagonAdapter(x, y, radius, innerColor, outerColor);
 
-				hex.setNameString("Hexagon" + hexagonCount++ + "," + hex.toString());
+				//hex.setNameString("Hexagon" + hexagonCount++ + "," + hex.toString());
 				CmdAdd cmd = new CmdAdd(model, hex, hex.getName() + " - Add");
 				commandManager.execute(cmd);
 				frame.getBtnUndo().setEnabled(true);
@@ -1055,8 +1040,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				circle.setSelected(true);
 				circle.setNameString(name + "," + circle.toString());
 
-				CircleModify circleModify = new CircleModify(model, c, circle, index,
-						c.getName() + ",Modify to," + circle.getName(), selectedObjects);
+				CircleModify circleModify = new CircleModify(shapeService, c, circle, selectedObjects);
 				commandManager.execute(circleModify);
 
 				frame.getBtnUndo().setEnabled(true);
@@ -1179,7 +1163,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 			}
 		}
 		i++;
-		if (i == txtFileLines.size() || txtFileLines.get(i) == null) {
+		if (i == temporarilyLogs.size() || temporarilyLogs.get(i) == null) {
 			frame.getBtnNext().setEnabled(false);
 		}
 		frame.repaint();

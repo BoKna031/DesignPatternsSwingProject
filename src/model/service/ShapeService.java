@@ -39,12 +39,11 @@ public class ShapeService implements IShapeService{
 
     @Override
     public Shape update(Shape entity) {
-        Shape oldShape = shapeRepository.read(entity.getId());
-        if(oldShape == null)
+        if(shapeRepository.read(entity.getId()) == null)
             return null;
-        Shape newShape = shapeRepository.update(entity);
-        logRepository.addLog(oldShape.getName() + ",Modify to," + newShape.getName());
-        return newShape;
+        Shape oldShape = shapeRepository.update(entity);
+        logRepository.addLog(oldShape.getName() + ",Modify to," + entity.getName());
+        return entity;
     }
 
     @Override
@@ -73,5 +72,14 @@ public class ShapeService implements IShapeService{
     @Override
     public List<String> getAllLogs() {
         return logRepository.getAllLogs();
+    }
+
+    @Override
+    public String getLastLog() {
+        List<String> logs = getAllLogs();
+        if (!logs.isEmpty()){
+            return logs.get(logs.size() - 1);
+        }
+        return null;
     }
 }

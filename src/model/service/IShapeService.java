@@ -15,4 +15,6 @@ public interface IShapeService extends CRUD<String, Shape> {
     Collection<Shape> getAll();
 
     List<String> getAllLogs();
+
+    String getLastLog();
 }

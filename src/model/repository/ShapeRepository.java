@@ -8,9 +8,12 @@ import java.util.HashMap;
 public class ShapeRepository implements IShapeRepository{
 
     private HashMap<String, Shape> shapes = new HashMap<>();
-
-
-    private int pointerCnt, lineCnt, rectangleCnt, circleCnt, donutCnt, hexagonCnt = 1;
+    private int pointerCnt = 1;
+    private int lineCnt = 1;
+    private int rectangleCnt = 1;
+    private int circleCnt = 1;
+    private int donutCnt = 1;
+    private int hexagonCnt = 1;
 
     @Override
     public Shape create(Shape entity) {
