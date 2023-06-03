@@ -1,10 +1,12 @@
-package repository;
+package model.repository;
 
+import geometry.Shape;
 import strategy.SaveLog;
 import strategy.SaveManager;
 import strategy.SavePainting;
-import java.io.File;
-import java.io.IOException;
+
+import java.io.*;
+import java.util.Collection;
 
 public class FileManager implements IFileManager{
 
@@ -22,8 +24,35 @@ public class FileManager implements IFileManager{
     }
 
     @Override
-    public void readFromFile(File path) {
+    public void readFromFile(File file) throws ClassNotFoundException, IOException{
+        if(getFileExtension(file.getName()).contentEquals("bin")){
+            loadBin(file);
+            return;
+        }
 
+        loadTxt(file);
+    }
+
+    private void loadBin(File file) throws ClassNotFoundException, IOException{
+        File logFile = new File(file.getAbsolutePath().replaceAll("bin", "txt"));
+        loadTxt(logFile);
+
+        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
+        shapeRepository.clear();
+        for(Shape shape: (Collection<Shape>) ois.readObject())
+            shapeRepository.create(shape);
+
+        ois.close();
+    }
+
+    private void loadTxt(File file) throws IOException{
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        String line;
+        logRepository.clearLogs();
+        while ((line = br.readLine()) != null) {
+            logRepository.addLog(line);
+        }
+        br.close();
     }
 
     @Override
@@ -63,14 +92,12 @@ public class FileManager implements IFileManager{
         SaveManager saveLog = new SaveManager(new SaveLog());
 
         savePainting.save(shapeRepository.getAll(), fileToSave);
-        saveLog.save(logRepository, fileToSaveLog);
+        saveLog.save(logRepository.getAllLogs(), fileToSaveLog);
     }
 
-    public IShapeRepository getShapeRepository() {
-        return shapeRepository;
-    }
-
-    public ILogRepository getLogRepository() {
-        return logRepository;
+    private String getFileExtension(String filename){
+        if(!filename.contains("."))
+            return "";
+        return filename.substring(filename.indexOf(".") + 1);
     }
 }

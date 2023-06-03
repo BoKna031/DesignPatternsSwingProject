@@ -73,40 +73,15 @@ public class Menu extends JMenuBar {
     }
 
     private boolean saveFile(File file){
-        if(!isBinFileNameValid(file.getName())) {
-            JOptionPane.showMessageDialog(null, "File name is not valid");
-            return false;
-        }
-
-        String path = getPathWithoutFileExtension(file.getAbsolutePath());
-
-        File binFile = new File(path + ".bin");
-        File logFile = new File(path + ".txt");
-
-
         try {
-            controller.save(binFile, logFile);
+            controller.save(file);
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "Unable to save file!");
+            JOptionPane.showMessageDialog(null, e.getMessage());
             e.printStackTrace();
             return false;
         }
 
         return true;
-    }
-
-    private boolean isBinFileNameValid(String filename){
-        String regex = "^[a-zA-Z0-9_-]+(\\.(bin))?$";
-        return filename.matches(regex);
-    }
-
-    private String getPathWithoutFileExtension(String path){
-        int dotIndex = path.indexOf('.');
-        if (dotIndex != -1) {
-            return path.substring(0, dotIndex);
-        } else {
-            return path;
-        }
     }
 
     private JFileChooser createChooserDialog(String dialogName, FileNameExtensionFilter filter) {

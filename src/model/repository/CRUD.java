@@ -1,4 +1,4 @@
-package repository;
+package model.repository;
 
 public interface CRUD<ID, T> {
     T create(T entity);
@@ -7,5 +7,5 @@ public interface CRUD<ID, T> {
 
     T update(T entity);
 
-    void delete(ID id);
+    T delete(ID id);
 }
