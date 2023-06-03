@@ -5,17 +5,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
-import mvc.DrawingModel;
-
 public class SavePainting implements SaveStrategy {
 	
 	@Override
-	public void save(Object o, File fileToSave) throws IOException {
-		DrawingModel model = (DrawingModel)o;
-		ObjectOutputStream ous = null;
+	public void save(Object o, File fileToSave){
+
+		ObjectOutputStream ous;
 		try {
 			ous = new ObjectOutputStream(new FileOutputStream(fileToSave));
-			ous.writeObject(model.getShapes());
+			ous.writeObject(o);
 			ous.close();
 		} catch (IOException e) {
 			e.printStackTrace();

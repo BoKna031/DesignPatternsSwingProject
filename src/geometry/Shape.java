@@ -7,6 +7,7 @@ public abstract class Shape implements Moveable, Comparable<Object>, Cloneable, 
 
 	private boolean selected;
 	public String nameString;
+	private String id;
 
 	public Shape() {}
 
@@ -37,5 +38,13 @@ public abstract class Shape implements Moveable, Comparable<Object>, Cloneable, 
 	public abstract void drawSelection(Graphics g);
 
 	public abstract void configureClone(Shape shapeToClone);
+
+	public void setId(String id){
+		this.id = id;
+	}
+
+	public String getId(){
+		return id;
+	}
 
 }

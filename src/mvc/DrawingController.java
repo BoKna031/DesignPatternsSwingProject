@@ -6,7 +6,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.*;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -39,21 +38,21 @@ import geometry.Line;
 import geometry.Point;
 import geometry.Rectangle;
 import geometry.Shape;
+import model.service.IShapeService;
 import observer.Observer;
 import observer.ObserverUpdate;
 import observer.SelectedObjects;
-import strategy.SaveLog;
-import strategy.SaveManager;
-import strategy.SavePainting;
 
 public class DrawingController extends MouseAdapter implements ActionListener {
 
 	
 	private DrawingModel model;
 	private DrawingFrame frame;
+
+	private IShapeService shapeService;
 	private SelectedObjects selectedObjects = new SelectedObjects();
 	CommandManager commandManager = CommandManager.getInstance();
-	ArrayList<String> txtFileLines = new ArrayList<String>();
+	ArrayList<String> txtFileLines = new ArrayList<>();
 	int i = 0;
 	
 	
@@ -68,7 +67,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 	int donutCount = 1;
 	int hexagonCount = 1;
 	
-	public DrawingController(DrawingModel model, DrawingFrame frame) {
+	public DrawingController(DrawingModel model, DrawingFrame frame, IShapeService shapeService) {
+		this.shapeService = shapeService;
 		this.model = model;
 		this.frame = frame;
 		commandManager.setFrame(frame);
@@ -83,10 +83,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		int y = e.getY();
 		Color innerColor = frame.getInnerColor();
 		Color outerColor = frame.getOuterColor();
-		
-		//Komande
-		
-		//Select
+
+
 		if(frame.getBtnSelect().isSelected()) {
 			if(model.getShapes() != null) {
 				
@@ -97,7 +95,6 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 						
 						CmdSelect selectCommand = new CmdSelect(shape, selectedObjects, shape.getName() + " - Selected");
 						commandManager.execute(selectCommand);
-						
 						notifyAllObservers(selectedObjects.size());
 						break;
 					} else if (shape.contains(x, y) && shape.isSelected()) {
@@ -128,7 +125,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 						
 						CmdAdd cmd = new CmdAdd(model, point, point.getName() + " - Add");
 						commandManager.execute(cmd);
-						
+						shapeService.create(point);
 						frame.getBtnUndo().setEnabled(true);
 						frame.getBtnRedo().setEnabled(false);
 					}
@@ -149,6 +146,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 						line.setNameString("Line" + lineCount++ + "," + line.toString());
 						CmdAdd cmd = new CmdAdd(model, line, line.getName() + " - Add");
 						commandManager.execute(cmd);
+						shapeService.create(line);
 						frame.getBtnUndo().setEnabled(true);
 						frame.getBtnRedo().setEnabled(false);
 					}
@@ -170,6 +168,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 					rect.setNameString("Rectangle" + rectangleCount++ + "," + rect.toString());
 					CmdAdd cmd = new CmdAdd(model, rect, rect.getName() + " - Add");
 					commandManager.execute(cmd);
+					shapeService.create(rect);
 					frame.getBtnUndo().setEnabled(true);
 					frame.getBtnRedo().setEnabled(false);
 				}
@@ -188,6 +187,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 					circle.setNameString("Circle" + circleCount++ + "," + circle.toString());
 					CmdAdd cmd = new CmdAdd(model, circle, circle.getName() + " - Add");
 					commandManager.execute(cmd);
+					shapeService.create(circle);
 					frame.getBtnUndo().setEnabled(true);
 					frame.getBtnRedo().setEnabled(false);
 				}
@@ -207,6 +207,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 					donut.setNameString("Donut" + donutCount++ + "," + donut.toString());
 					CmdAdd cmd = new CmdAdd(model, donut, donut.getName() + " - Add");
 					commandManager.execute(cmd);
+					shapeService.create(donut);
 					frame.getBtnUndo().setEnabled(true);
 					frame.getBtnRedo().setEnabled(false);
 				}
@@ -227,6 +228,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 					hex.setNameString("Hexagon" + hexagonCount++ + "," + hex.toString());
 					CmdAdd cmd = new CmdAdd(model, hex, hex.getName() + " - Add");
 					commandManager.execute(cmd);
+					shapeService.create(hex);
 					frame.getBtnUndo().setEnabled(true);
 					frame.getBtnRedo().setEnabled(false);
 				}
@@ -683,57 +685,35 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		}
 	}
 	
-	public void save(File fileToSave, File fileToSaveLog) throws IOException {
-			SaveManager savePainting = new SaveManager(new SavePainting());
-			SaveManager saveLog = new SaveManager(new SaveLog());
-			
-			savePainting.save(model, fileToSave);
-			saveLog.save(frame, fileToSaveLog);
+	public void save(File file) throws IOException {
+			shapeService.saveToFile(file);
 	}
 	
 	@SuppressWarnings("unchecked")
 	public void load(File fileToLoad) throws ClassNotFoundException, IOException {
 			frame.getBtnNext().setEnabled(false);
 			frame.clearLogArea();
-			File f = new File(fileToLoad.getAbsolutePath().replaceAll("bin", "txt"));
-			BufferedReader br = new BufferedReader(new FileReader(f));
-			String line;
-			
-			while ((line = br.readLine()) != null) {
-				
-				frame.appendLog(line);
+			shapeService.readFromFile(fileToLoad);
+			model.getShapes().clear();
+			selectedObjects.clear();
+			commandManager.clearNormal();
+			commandManager.clearReverse();
+			frame.getBtnUndo().setEnabled(false);
+			frame.getBtnRedo().setEnabled(false);
+
+			model.getShapes().addAll(shapeService.getAll());
+
+			frame.getView().repaint();
+
+			for(String log: shapeService.getAllLogs()){
+				frame.appendLog(log);
 			}
-			br.close();
-			
-			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileToLoad));
-			try {
-					model.getShapes().clear();
-					selectedObjects.clear();
-					commandManager.clearNormal();
-					commandManager.clearReverse();
-					frame.getBtnUndo().setEnabled(false);
-					frame.getBtnRedo().setEnabled(false);
-					
-					model.getShapes().addAll((ArrayList<Shape>) ois.readObject());
-					
-					frame.getView().repaint();
-			} catch (SocketTimeoutException exc) {
 
-			} catch (InvalidClassException ex) {
-
-			} catch (EOFException exc) {
-				ois.close();
-
-			} catch (IOException exc) {
-				exc.printStackTrace();
-			}
 			for (int i = 0; i < model.getShapes().size(); i++) {
 				if (model.getShapes().get(i).isSelected()) {
 					selectedObjects.add(model.getShapes().get(i));
 				}
 			}
-			
-			ois.close();
 	}
 	
 	public void loadOneByOne(File fileToLoad) throws IOException {
