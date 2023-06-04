@@ -50,7 +50,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 	private DrawingFrame frame;
 
 	private IShapeService shapeService;
-	private SelectedObjects selectedObjects = new SelectedObjects();
+	private ArrayList<Shape> selectedObjects = new ArrayList<>();
 	CommandManager commandManager = CommandManager.getInstance();
 	ArrayList<String> temporarilyLogs = new ArrayList<>();
 	int i = 0;
@@ -69,7 +69,42 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		observer.addPropertyChangeListener(observerUpdate);
 		
 	}
-	
+	private void selectBtnClicked(int x, int y){
+		if(shapeService.getAll() == null || shapeService.getAll().size() == 0)
+			return;
+
+		boolean isObjectFound = changeStatusOfSelectedObject(x, y);
+
+		if(!isObjectFound) //if user clicks on background
+			deselectAllObjects();
+
+		notifyAllObservers(shapeService.getSelected().size());
+
+	}
+
+	private void deselectAllObjects(){
+		for (Shape s : shapeService.getSelected()) {
+			CmdDeselect deselectCommand = new CmdDeselect(s.getId(), shapeService);
+			commandManager.execute(deselectCommand);
+		}
+	}
+	private boolean changeStatusOfSelectedObject(int x, int y) {
+		for (Shape shape : shapeService.getAll()) {
+			if(!shape.contains(x, y)) {
+				continue;
+			}
+			if(shape.isSelected()) {
+				CmdDeselect deselectCommand = new CmdDeselect(shape.getId(), shapeService);
+				commandManager.execute(deselectCommand);
+			}else{
+				CmdSelect selectCommand = new CmdSelect(shape.getId(), shapeService);
+				commandManager.execute(selectCommand);
+			}
+			return true;
+		}
+		return false;
+	}
+
 	public void mouseClicked(MouseEvent e) {
 		
 		int x = e.getX();
@@ -77,38 +112,10 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		Color innerColor = frame.getInnerColor();
 		Color outerColor = frame.getOuterColor();
 
-
 		if(frame.getBtnSelect().isSelected()) {
-			if(model.getShapes() != null) {
-				
-				for (int i = model.getShapes().size() - 1; i >= 0; i--) {
-					Shape shape = model.get(i);
-					
-					if (shape.contains(x, y) && !shape.isSelected()) {
-						
-						CmdSelect selectCommand = new CmdSelect(shape, selectedObjects, shape.getName() + " - Selected");
-						commandManager.execute(selectCommand);
-						notifyAllObservers(selectedObjects.size());
-						break;
-					} else if (shape.contains(x, y) && shape.isSelected()) {
-						CmdDeselect deselectCommand = new CmdDeselect(shape, selectedObjects, shape.getName() + " - Deselected");
-						commandManager.execute(deselectCommand);
-						notifyAllObservers(selectedObjects.size());
-						break;
-					} else if (i == 0) {
-						for (int j = 0; selectedObjects.size() > 0;) {
-							CmdDeselect deselectCommand = new CmdDeselect(selectedObjects.get(j), selectedObjects, selectedObjects.get(j).getName() + " - Deselected");
-							commandManager.execute(deselectCommand);
-						}
-						
-						notifyAllObservers(selectedObjects.size());
-					}
-				}
-			}
+			selectBtnClicked(x,y);
 		}
-		
-		//Iscrtavanje oblika
-		
+
 		//POINT
 		else if (frame.getBtnPoint().isSelected()) {
 			try {
@@ -251,7 +258,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 					Shape shape = selectedObjects.get(0);
 					if(shape.isSelected()) {
 						int index = model.getShapes().indexOf(shape);
-						CmdRemove cmdRemove = new CmdRemove(model, shape, index, shape.getName() + " - Deleted", selectedObjects);
+						CmdRemove cmdRemove = new CmdRemove(model, shape, index, shape.getName() + " - Deleted");
 						selectedObjects.remove(shape);
 						commandManager.execute(cmdRemove);
 						
@@ -298,7 +305,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				newShape.setSelected(true);
 				newShape.setId(shape.getId());
 				newShape.setNameString(newShape.getId()+ "," + shape);
-				ShapeModify shapeModify = new ShapeModify(shapeService, shape, newShape, selectedObjects);
+				ShapeModify shapeModify = new ShapeModify(shapeService, shape, newShape);
 				commandManager.execute(shapeModify);
 				model.getShapes().clear();
 				model.getShapes().addAll(shapeService.getAll());
@@ -800,8 +807,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				point.setSelected(true);
 				point.setNameString(name + "," +point.toString() + ",color," + String.valueOf(point.getColor().getRGB()));
 				
-				PointModify pointModify = new PointModify(model, p, point, index, p.getName() + ",Modify to," + point.getName(), selectedObjects);
-				commandManager.execute(pointModify);
+				//PointModify pointModify = new PointModify(model, p, point, index, p.getName() + ",Modify to," + point.getName(), selectedObjects);
+				//commandManager.execute(pointModify);
 				
 				frame.getBtnUndo().setEnabled(true);
 				frame.getBtnRedo().setEnabled(false);
@@ -833,8 +840,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				line2.setSelected(true);
 				line2.setNameString(name + "," + line2.toString());
 				
-				LineModify lineModify = new LineModify(model, l, line2, index, l.getName() + ",Modify to," + line2.getName(), selectedObjects);
-				commandManager.execute(lineModify);
+				//LineModify lineModify = new LineModify(model, l, line2, index, l.getName() + ",Modify to," + line2.getName(), selectedObjects);
+				//commandManager.execute(lineModify);
 				
 				frame.getBtnUndo().setEnabled(true);
 				frame.getBtnRedo().setEnabled(false);
@@ -867,8 +874,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				rectangle.setSelected(true);
 				rectangle.setNameString(name + "," + rectangle.toString());
 				
-				RectangleModify rectangleModify = new RectangleModify(model, r, rectangle, index, r.getName() + ",Modify to," + rectangle.getName(), selectedObjects);
-				commandManager.execute(rectangleModify);
+				//RectangleModify rectangleModify = new RectangleModify(model, r, rectangle, index, r.getName() + ",Modify to," + rectangle.getName(), selectedObjects);
+				//commandManager.execute(rectangleModify);
 				
 				frame.getBtnUndo().setEnabled(true);
 				frame.getBtnRedo().setEnabled(false);
@@ -900,8 +907,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				circle.setSelected(true);
 				circle.setNameString(name + "," + circle.toString());
 
-				ShapeModify shapeModify = new ShapeModify(shapeService, c, circle, selectedObjects);
-				commandManager.execute(shapeModify);
+				//ShapeModify shapeModify = new ShapeModify(shapeService, c, circle, selectedObjects);
+				//commandManager.execute(shapeModify);
 
 				frame.getBtnUndo().setEnabled(true);
 				frame.getBtnRedo().setEnabled(false);
@@ -935,8 +942,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				donut.setSelected(true);
 				donut.setNameString(name + "," + donut.toString());
 
-				ShapeModify shapeModify = new ShapeModify(shapeService, d, donut, selectedObjects);
-				commandManager.execute(shapeModify);
+				//ShapeModify shapeModify = new ShapeModify(shapeService, d, donut, selectedObjects);
+				//commandManager.execute(shapeModify);
 
 				frame.getBtnUndo().setEnabled(true);
 				frame.getBtnRedo().setEnabled(false);
@@ -968,8 +975,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				hex.setSelected(true);
 				hex.setNameString(name + "," + hex.toString());
 				
-				HexModify hexModify = new HexModify(model, h, hex, index, h.getName() + ",Modify to," + hex.getName(), selectedObjects);
-				commandManager.execute(hexModify);
+				// HexModify hexModify = new HexModify(model, h, hex, index, h.getName() + ",Modify to," + hex.getName(), selectedObjects);
+				//commandManager.execute(hexModify);
 				
 				frame.getBtnUndo().setEnabled(true);
 				frame.getBtnRedo().setEnabled(false);
@@ -984,9 +991,9 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 			shape = selectedObjects.get(0);
 			if (shape.isSelected()) {
 				int index = model.getShapes().indexOf(shape);
-				CmdRemove cmdRemove = new CmdRemove(model, shape, index, shape.getName() + " - Deleted", selectedObjects);
-				selectedObjects.remove(shape);
-				commandManager.execute(cmdRemove);
+				//CmdRemove cmdRemove = new CmdRemove(model, shape, index, shape.getName() + " - Deleted", selectedObjects);
+				//selectedObjects.remove(shape);
+				//commandManager.execute(cmdRemove);
 				
 				frame.getBtnUndo().setEnabled(true);
 				frame.getBtnRedo().setEnabled(false);
@@ -998,8 +1005,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				shape = model.get(i);
 				
 				if (shape.getName().equals(line)) {
-					CmdSelect selectCommand = new CmdSelect(shape, selectedObjects, shape.getName() + " - Selected");
-					commandManager.execute(selectCommand);
+					//CmdSelect selectCommand = new CmdSelect(shape, selectedObjects, shape.getName() + " - Selected");
+					//commandManager.execute(selectCommand);
 					
 					notifyAllObservers(selectedObjects.size());
 					break;
@@ -1013,8 +1020,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				shape = model.get(i);
 				
 				if (shape.getName().equals(line)) {
-					CmdDeselect deselectCommand = new CmdDeselect(shape, selectedObjects, shape.getName() + " - Deselected");
-					commandManager.execute(deselectCommand);
+					//CmdDeselect deselectCommand = new CmdDeselect(shape, selectedObjects, shape.getName() + " - Deselected");
+					//commandManager.execute(deselectCommand);
 					
 					notifyAllObservers(selectedObjects.size());
 					break;

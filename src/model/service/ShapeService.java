@@ -5,6 +5,7 @@ import model.repository.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -81,5 +82,37 @@ public class ShapeService implements IShapeService{
             return logs.get(logs.size() - 1);
         }
         return null;
+    }
+
+    @Override
+    public void select(String id) throws NoSuchFieldException {
+        Shape shape = read(id);
+        if(shape == null)
+            throw new NoSuchFieldException("Shape with id " + id + " doesn't exists");
+        if(!shape.isSelected()){
+            shape.setSelected(true);
+            logRepository.addLog(shape.getName() + " - Selected");
+        }
+    }
+
+    @Override
+    public void deselect(String id) throws NoSuchFieldException {
+        Shape shape = read(id);
+        if(shape == null)
+            throw new NoSuchFieldException("Shape with id " + id + " doesn't exists");
+        if(shape.isSelected()){
+            shape.setSelected(false);
+            logRepository.addLog(shape.getName() + " - Deselected");
+        }
+    }
+
+    @Override
+    public Collection<Shape> getSelected() {
+        ArrayList<Shape> selectedShapes = new ArrayList<>();
+        for(Shape s: getAll()){
+            if(s.isSelected())
+                selectedShapes.add(s);
+        }
+        return selectedShapes;
     }
 }
