@@ -29,7 +29,7 @@ public class ShapeService implements IShapeService{
     public Shape create(Shape entity) {
         Shape createdShape = shapeRepository.create(entity);
         if(createdShape != null)
-            logRepository.addLog(createdShape.getName() + " - Add");
+            logRepository.addLog( createdShape.getId()+ "," + createdShape+ " - Add");
         return createdShape;
     }
 

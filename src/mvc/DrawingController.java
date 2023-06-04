@@ -17,10 +17,6 @@ import command.commands.ShapeModify;
 import command.commands.CmdAdd;
 import command.commands.CmdRemove;
 import command.commands.CmdDeselect;
-import command.commands.HexModify;
-import command.commands.LineModify;
-import command.commands.PointModify;
-import command.commands.RectangleModify;
 import command.commands.CmdSelect;
 import command.commands.CmdToBack;
 import command.commands.CmdToFront;
@@ -69,41 +65,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		observer.addPropertyChangeListener(observerUpdate);
 		
 	}
-	private void selectBtnClicked(int x, int y){
-		if(shapeService.getAll() == null || shapeService.getAll().size() == 0)
-			return;
 
-		boolean isObjectFound = changeStatusOfSelectedObject(x, y);
-
-		if(!isObjectFound) //if user clicks on background
-			deselectAllObjects();
-
-		notifyAllObservers(shapeService.getSelected().size());
-
-	}
-
-	private void deselectAllObjects(){
-		for (Shape s : shapeService.getSelected()) {
-			CmdDeselect deselectCommand = new CmdDeselect(s.getId(), shapeService);
-			commandManager.execute(deselectCommand);
-		}
-	}
-	private boolean changeStatusOfSelectedObject(int x, int y) {
-		for (Shape shape : shapeService.getAll()) {
-			if(!shape.contains(x, y)) {
-				continue;
-			}
-			if(shape.isSelected()) {
-				CmdDeselect deselectCommand = new CmdDeselect(shape.getId(), shapeService);
-				commandManager.execute(deselectCommand);
-			}else{
-				CmdSelect selectCommand = new CmdSelect(shape.getId(), shapeService);
-				commandManager.execute(selectCommand);
-			}
-			return true;
-		}
-		return false;
-	}
 
 	public void mouseClicked(MouseEvent e) {
 		
@@ -114,139 +76,57 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 
 		if(frame.getBtnSelect().isSelected()) {
 			selectBtnClicked(x,y);
+			return;
 		}
 
-		//POINT
-		else if (frame.getBtnPoint().isSelected()) {
-			try {
-					Point point = pointDialog(new Point(x,y,outerColor), false);
-					if (point != null) {
-						Shape newShape = shapeService.create(point);
-						point.setNameString(newShape.getId() + "," + point + ",color," + point.getColor().getRGB());
-						
-						CmdAdd cmd = new CmdAdd(model, point, point.getName() + " - Add");
-						commandManager.execute(cmd);
-
-						frame.getBtnUndo().setEnabled(true);
-						frame.getBtnRedo().setEnabled(false);
-					}
-			} catch (Exception ex) {
-				JOptionPane.showMessageDialog(null, ex.getMessage());
-			}
+		Shape newShape;
+		Point p = new Point(x,y);
+		if (frame.getBtnPoint().isSelected()) {
+			newShape = pointDialog(new Point(x, y, outerColor), false);
+		} else if (frame.getBtnLine().isSelected()) {
+			newShape = lineBtnClicked(p);
+			if(newShape == null)
+				return;
+		} else if (frame.getBtnRectangle().isSelected()) {
+			newShape = rectDialog(new Rectangle(p, 0, 0, innerColor, outerColor), false);
+		} else if (frame.getBtnCircle().isSelected()) {
+			newShape = circleDialog(new Circle(p,0,innerColor,outerColor), false);
+		} else if (frame.getBtnDonut().isSelected()) {
+			newShape = donutDialog(new Donut(p,0,0,innerColor,outerColor), false);
+		} else if (frame.getBtnHex().isSelected()) {
+			newShape = hexDialog(new HexagonAdapter(x, y, 0, innerColor, outerColor), false);
+		} else {
+			return;
 		}
-		
-		//LINE
-		else if (frame.getBtnLine().isSelected()) {
-			
-			if(frame.startPoint == null) {
-				frame.startPoint = new Point(x, y);
-			} else {
-				try {
-					Point p1 = new Point(frame.startPoint.getX(), frame.startPoint.getY());
-					Point p2 = new Point(x,y);
 
-					Line line = lineDialog(new Line(p1,p2,outerColor), false);
-					if (line != null) {
-						Shape newShape = shapeService.create(line);
-						line.setNameString(newShape.getId() + "," + line);
-						CmdAdd cmd = new CmdAdd(model, line, line.getName() + " - Add");
-						commandManager.execute(cmd);
+		CmdAdd cmd = new CmdAdd(shapeService, newShape);
+		commandManager.execute(cmd);
 
-						frame.getBtnUndo().setEnabled(true);
-						frame.getBtnRedo().setEnabled(false);
-					}
-				} catch (Exception ex) {
-					JOptionPane.showMessageDialog(null, ex.getMessage());
-				}
-				
-				frame.startPoint = null;
-			}
-		}
-		
-		//RECTANGLE
-		else if (frame.getBtnRectangle().isSelected()) {
+		frame.getBtnUndo().setEnabled(true);
+		frame.getBtnRedo().setEnabled(false);
 
-			try {
-				Point p = new Point(x,y);
-				Rectangle rect = rectDialog(new Rectangle(p, 0, 0, innerColor, outerColor), false);
-				if (rect != null) {
-					Shape newShape = shapeService.create(rect);
-					rect.setNameString(newShape.getId() + "," + rect);
-					CmdAdd cmd = new CmdAdd(model, rect, rect.getName() + " - Add");
-					commandManager.execute(cmd);
-					frame.getBtnUndo().setEnabled(true);
-					frame.getBtnRedo().setEnabled(false);
-				}
-			} catch (Exception ex) {
-				JOptionPane.showMessageDialog(null, ex.getMessage());
-			}
-		}
-		
-		//CIRCLE
-		else if (frame.getBtnCircle().isSelected()) {
+		model.getShapes().clear();
+		model.getShapes().addAll(shapeService.getAll());
 
-			try {
-				Point p = new Point(x, y);
-				Circle circle = circleDialog(new Circle(p,0,innerColor,outerColor), false);
-
-				if (circle != null) {
-
-					Shape newShape = shapeService.create(circle);
-					circle.setNameString(newShape.getId() + "," + circle);
-					CmdAdd cmd = new CmdAdd(model, circle, circle.getName() + " - Add");
-					commandManager.execute(cmd);
-					frame.getBtnUndo().setEnabled(true);
-					frame.getBtnRedo().setEnabled(false);
-				}
-
-			} catch (Exception ex) {
-				JOptionPane.showMessageDialog(null, ex.getMessage());
-			}
-
-		}
-		
-		//DONUT
-		else if (frame.getBtnDonut().isSelected()) {
-
-			try {
-				Point p = new Point(x, y);
-				Donut donut = donutDialog(new Donut(p,0,0,innerColor,outerColor), false);
-				if (donut != null) {
-					Shape newShape = shapeService.create(donut);
-					donut.setNameString(newShape.getId() + "," + donut);
-					CmdAdd cmd = new CmdAdd(model, donut, donut.getName() + " - Add");
-					commandManager.execute(cmd);
-					frame.getBtnUndo().setEnabled(true);
-					frame.getBtnRedo().setEnabled(false);
-				}
-
-			} catch (Exception ex) {
-				JOptionPane.showMessageDialog(null, ex.getMessage());
-			}
-		}
-		
-		//Hexagon
-		else if (frame.getBtnHex().isSelected()) {
-			
-			try {
-				HexagonAdapter hex = hexDialog(new HexagonAdapter(x, y, 0, innerColor, outerColor), false);
-				if(hex != null) {
-					Shape newShape = shapeService.create(hex);
-					hex.setNameString(newShape.getId() + "," + hex);
-					CmdAdd cmd = new CmdAdd(model, hex, hex.getName() + " - Add");
-					commandManager.execute(cmd);
-					frame.getBtnUndo().setEnabled(true);
-					frame.getBtnRedo().setEnabled(false);
-				}
-			} catch (Exception ex) {
-				JOptionPane.showMessageDialog(null, ex.getMessage());
-			}
-		}
 		frame.getView().repaint();
 		frame.getBtnNext().setEnabled(false);
 		
 	}
-	
+
+	private Shape lineBtnClicked(Point point) {
+		if(frame.startPoint == null) {
+			frame.startPoint = point;
+			return null;
+		}
+		Point p1 = frame.startPoint;
+		Point p2 = point;
+
+
+		Shape line = lineDialog(new Line(p1,p2,p2.getColor()), false);
+		frame.startPoint = null;
+		return line;
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
@@ -672,8 +552,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				
 				//point.setNameString("Point" + pointerCount++ + "," + point.toString() + ",color," + String.valueOf(point.getColor().getRGB()));
 				
-				CmdAdd cmd = new CmdAdd(model, point, point.getName() + " - Add");
-				commandManager.execute(cmd);
+				//CmdAdd cmd = new CmdAdd(model, point, point.getName() + " - Add");
+				//commandManager.execute(cmd);
 				
 				frame.getBtnUndo().setEnabled(true);
 				frame.getBtnRedo().setEnabled(false);
@@ -695,8 +575,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				
 				//lineObject.setNameString("Line" + lineCount++ + "," + lineObject.toString());
 				
-				CmdAdd cmd =  new CmdAdd(model, lineObject, lineObject.getName() + " - Add");
-				commandManager.execute(cmd);
+				//CmdAdd cmd =  new CmdAdd(model, lineObject, lineObject.getName() + " - Add");
+				//commandManager.execute(cmd);
 				frame.getBtnUndo().setEnabled(true);
 				frame.getBtnRedo().setEnabled(false);
 				
@@ -715,8 +595,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				Rectangle rect = new Rectangle(upperLeftPoint, width, height, innerColor, outerColor);
 
 				//rect.setNameString("Rectangle" + rectangleCount++ + "," + rect.toString());
-				CmdAdd cmd = new CmdAdd(model, rect, rect.getName() + " - Add");
-				commandManager.execute(cmd);
+				//CmdAdd cmd = new CmdAdd(model, rect, rect.getName() + " - Add");
+				//commandManager.execute(cmd);
 				frame.getBtnUndo().setEnabled(true);
 				frame.getBtnRedo().setEnabled(false);
 				
@@ -734,8 +614,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				Circle circle = new Circle(center, radius, innerColor, outerColor);
 
 				//circle.setNameString("Circle" + circleCount++ + "," + circle.toString());
-				CmdAdd cmd = new CmdAdd(model, circle, circle.getName() + " - Add");
-				commandManager.execute(cmd);
+				//CmdAdd cmd = new CmdAdd(model, circle, circle.getName() + " - Add");
+				//commandManager.execute(cmd);
 				frame.getBtnUndo().setEnabled(true);
 				frame.getBtnRedo().setEnabled(false);
 
@@ -754,8 +634,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				Donut donut = new Donut(center, innerRadius, radius, innerColor, outerColor);
 
 				//donut.setNameString("Donut" + donutCount++ + "," + donut.toString());
-				CmdAdd cmd = new CmdAdd(model, donut, donut.getName() + " - Add");
-				commandManager.execute(cmd);
+				//CmdAdd cmd = new CmdAdd(model, donut, donut.getName() + " - Add");
+				//commandManager.execute(cmd);
 				frame.getBtnUndo().setEnabled(true);
 				frame.getBtnRedo().setEnabled(false);
 				
@@ -773,8 +653,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				HexagonAdapter hex = new HexagonAdapter(x, y, radius, innerColor, outerColor);
 
 				//hex.setNameString("Hexagon" + hexagonCount++ + "," + hex.toString());
-				CmdAdd cmd = new CmdAdd(model, hex, hex.getName() + " - Add");
-				commandManager.execute(cmd);
+				//CmdAdd cmd = new CmdAdd(model, hex, hex.getName() + " - Add");
+				//commandManager.execute(cmd);
 				frame.getBtnUndo().setEnabled(true);
 				frame.getBtnRedo().setEnabled(false);
 					
@@ -1033,5 +913,42 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 			frame.getBtnNext().setEnabled(false);
 		}
 		frame.repaint();
+	}
+
+
+	private void selectBtnClicked(int x, int y){
+		if(shapeService.getAll() == null || shapeService.getAll().size() == 0)
+			return;
+
+		boolean isObjectFound = changeStatusOfSelectedObject(x, y);
+
+		if(!isObjectFound) //if user clicks on background
+			deselectAllObjects();
+
+		notifyAllObservers(shapeService.getSelected().size());
+
+	}
+
+	private void deselectAllObjects(){
+		for (Shape s : shapeService.getSelected()) {
+			CmdDeselect deselectCommand = new CmdDeselect(s.getId(), shapeService);
+			commandManager.execute(deselectCommand);
+		}
+	}
+	private boolean changeStatusOfSelectedObject(int x, int y) {
+		for (Shape shape : shapeService.getAll()) {
+			if(!shape.contains(x, y)) {
+				continue;
+			}
+			if(shape.isSelected()) {
+				CmdDeselect deselectCommand = new CmdDeselect(shape.getId(), shapeService);
+				commandManager.execute(deselectCommand);
+			}else{
+				CmdSelect selectCommand = new CmdSelect(shape.getId(), shapeService);
+				commandManager.execute(selectCommand);
+			}
+			return true;
+		}
+		return false;
 	}
 }
