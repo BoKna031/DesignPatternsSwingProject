@@ -8,7 +8,6 @@ import java.awt.geom.Area;
 public class Donut extends Circle {
 
 	private int innerRadius;
-	private Area area;
 
 	public Donut() {
 
@@ -27,7 +26,7 @@ public class Donut extends Circle {
 
 	public void draw(Graphics g) {
 				
-		Color color = new Color (255.0f / 255.0f, 255.0f / 255.0f, 221.0f / 255.0f, 0.0f); 
+		Color color = new Color (1.0f, 1.0f, 1.0f, 0.0f);
 		g.setColor(color);
 		g.fillOval(this.getCenter().getX() - this.getInnerRadius(), this.getCenter().getY() - this.getInnerRadius(),
 				this.getInnerRadius() * 2, this.getInnerRadius() * 2);
@@ -113,7 +112,7 @@ public class Donut extends Circle {
 		return innerRadius;
 	}
 
-	public void setInnerRadius(int innerRadius) throws Exception {
+	public void setInnerRadius(int innerRadius) {
 		if (innerRadius <= 0) {
 			throw new NumberFormatException("Inner radius has to be a value greater than 0");
 		} else if (innerRadius >= super.getRadius()) {

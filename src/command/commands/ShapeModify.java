@@ -1,18 +1,17 @@
 package command.commands;
 
 import command.Command;
-import geometry.Circle;
 import geometry.Shape;
 import model.service.IShapeService;
 import observer.SelectedObjects;
 
 public class ShapeModify implements Command {
 
-	private Shape oldState;
-	private Shape newState;
-	private IShapeService service;
+	private final Shape oldState;
+	private final Shape newState;
+	private final IShapeService service;
 	private String log;
-	private SelectedObjects selectedObjects;
+	private final SelectedObjects selectedObjects;
 
 	public ShapeModify(IShapeService service, Shape oldState, Shape newState,
 					   SelectedObjects selectedObjects) {
