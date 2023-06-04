@@ -2,19 +2,20 @@ package command.commands;
 
 import command.Command;
 import geometry.Circle;
+import geometry.Shape;
 import model.service.IShapeService;
 import observer.SelectedObjects;
 
-public class CircleModify implements Command {
+public class ShapeModify implements Command {
 
-	private Circle oldState;
-	private Circle newState;
+	private Shape oldState;
+	private Shape newState;
 	private IShapeService service;
 	private String log;
 	private SelectedObjects selectedObjects;
 
-	public CircleModify(IShapeService service, Circle oldState, Circle newState,
-						SelectedObjects selectedObjects) {
+	public ShapeModify(IShapeService service, Shape oldState, Shape newState,
+					   SelectedObjects selectedObjects) {
 		this.oldState = oldState;
 		this.newState = newState;
 		this.service = service;

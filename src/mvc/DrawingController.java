@@ -13,11 +13,10 @@ import javax.swing.JOptionPane;
 import command.CommandManager;
 import command.commands.CmdBringToBack;
 import command.commands.CmdBringToFront;
-import command.commands.CircleModify;
+import command.commands.ShapeModify;
 import command.commands.CmdAdd;
 import command.commands.CmdRemove;
 import command.commands.CmdDeselect;
-import command.commands.DonutModify;
 import command.commands.HexModify;
 import command.commands.LineModify;
 import command.commands.PointModify;
@@ -113,7 +112,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		//POINT
 		else if (frame.getBtnPoint().isSelected()) {
 			try {
-					Point point = pointDialog(x, y, outerColor, false);
+					Point point = pointDialog(new Point(x,y,outerColor), false);
 					if (point != null) {
 						Shape newShape = shapeService.create(point);
 						point.setNameString(newShape.getId() + "," + point + ",color," + point.getColor().getRGB());
@@ -136,7 +135,10 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				frame.startPoint = new Point(x, y);
 			} else {
 				try {
-					Line line = lineDialog(frame.startPoint.getX(), frame.startPoint.getY(), x, y, outerColor, false);
+					Point p1 = new Point(frame.startPoint.getX(), frame.startPoint.getY());
+					Point p2 = new Point(x,y);
+
+					Line line = lineDialog(new Line(p1,p2,outerColor), false);
 					if (line != null) {
 						Shape newShape = shapeService.create(line);
 						line.setNameString(newShape.getId() + "," + line);
@@ -158,8 +160,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		else if (frame.getBtnRectangle().isSelected()) {
 
 			try {
-
-				Rectangle rect = rectDialog(x, y, 0, 0, innerColor, outerColor, false);
+				Point p = new Point(x,y);
+				Rectangle rect = rectDialog(new Rectangle(p, 0, 0, innerColor, outerColor), false);
 				if (rect != null) {
 					Shape newShape = shapeService.create(rect);
 					rect.setNameString(newShape.getId() + "," + rect);
@@ -177,7 +179,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		else if (frame.getBtnCircle().isSelected()) {
 
 			try {
-				Circle circle = circleDialog(x, y, 0, innerColor, outerColor, false);
+				Point p = new Point(x, y);
+				Circle circle = circleDialog(new Circle(p,0,innerColor,outerColor), false);
 
 				if (circle != null) {
 
@@ -199,7 +202,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		else if (frame.getBtnDonut().isSelected()) {
 
 			try {
-				Donut donut = donutDialog(x, y, 0, 0, innerColor, outerColor, false);
+				Point p = new Point(x, y);
+				Donut donut = donutDialog(new Donut(p,0,0,innerColor,outerColor), false);
 				if (donut != null) {
 					Shape newShape = shapeService.create(donut);
 					donut.setNameString(newShape.getId() + "," + donut);
@@ -218,8 +222,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		else if (frame.getBtnHex().isSelected()) {
 			
 			try {
-				
-				HexagonAdapter hex = hexDialog(x, y, 0, innerColor, outerColor, false);
+				HexagonAdapter hex = hexDialog(new HexagonAdapter(x, y, 0, innerColor, outerColor), false);
 				if(hex != null) {
 					Shape newShape = shapeService.create(hex);
 					hex.setNameString(newShape.getId() + "," + hex);
@@ -266,161 +269,43 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 			if (selectedObjects.size() == 1) {
 				Shape shape = selectedObjects.get(0);
 				String s = shape.getClass().getSimpleName();
-				
+				Shape newShape;
 				switch (s) {
-				//Tacka
-				case "Point":
-					try {
-						Point p = (Point) shape;
-						Point point = pointDialog(p.getX(), p.getY(), p.getColor(), true);
-						if (point != null) {
-							point.setSelected(true);
-							
-							String[] attributes = p.getName().split(",");
-							String name = attributes[0];
-							int index = model.getShapes().indexOf(shape);
-							
-							point.setNameString(name + "," + point.toString() + ",color," + String.valueOf(point.getColor().getRGB()));
-							PointModify pointModify = new PointModify(model, p, point, index, p.getName() + ",Modify to," + point.getName(), selectedObjects);
-							commandManager.execute(pointModify);
-							
-							frame.getBtnUndo().setEnabled(true);
-							frame.getBtnRedo().setEnabled(false);
-						}
-					} catch (Exception ex) {
-						JOptionPane.showMessageDialog(null, ex.getMessage());
-					}
-					break;
-					//Linija
-				case "Line":
-					try {
-						Line l = (Line) shape;
-						Line line = lineDialog(l.getStartPoint().getX(), l.getStartPoint().getY(), l.getEndPoint().getX(), l.getEndPoint().getY(), l.getColor(), true);
-						if (line != null) {
-							int index = model.getShapes().indexOf(shape);
-							
-							String[] attributes = l.getName().split(",");
-							String name = attributes[0];
-							
-							line.setNameString(name + "," + line.toString());
-							line .setSelected(true);
-							
-							LineModify lineModify = new LineModify(model, l, line, index, l.getName() + ",Modify to," + line.getName(), selectedObjects);
-							commandManager.execute(lineModify);
-							
-							frame.getBtnUndo().setEnabled(true);
-							frame.getBtnRedo().setEnabled(false);
-						}
-					} catch (Exception ex) {
-						JOptionPane.showMessageDialog(null, ex.getMessage());
-					}
-					break;
-					//Pravougaonik
-				case "Rectangle":
-						try {
-							Rectangle r = (Rectangle) shape;
-							Rectangle rect = rectDialog(r.getUpperLeftPoint().getX(), r.getUpperLeftPoint().getY(),
-									r.getHeight(), r.getWidth(), r.getInnerColor(), r.getOuterColor(), true);
-							if (rect != null) {
-								int index = model.getShapes().indexOf(shape);
-								rect.setSelected(true);
-								String[] attributes = r.getName().split(",");
-								String name = attributes[0];
-								rect.setNameString(name + "," + rect.toString());
-
-								RectangleModify rectangleModify = new RectangleModify(model, r, rect, index,
-										r.getName() + ",Modify to," + rect.getName(), selectedObjects);
-								commandManager.execute(rectangleModify);
-
-								frame.getBtnUndo().setEnabled(true);
-								frame.getBtnRedo().setEnabled(false);
-							}
-
-						} catch (Exception ex) {
-							JOptionPane.showMessageDialog(null, ex.getMessage());
-						}
+					case "Point":
+						newShape = pointDialog((Point) shape, true);
 						break;
-					//Krug
-				case "Circle":
-					try {
-						Circle c = (Circle) shape;
-						Circle circle = circleDialog(c.getCenter().getX(), c.getCenter().getY(), c.getRadius(),
-								c.getInnerColor(), c.getOuterColor(), true);
-						if (circle != null) {
-							circle.setSelected(true);
-							circle.setId(c.getId());
-							circle.setNameString(circle.getId() + "," + circle);
-
-							CircleModify circleModify = new CircleModify(shapeService, c, circle, selectedObjects);
-							commandManager.execute(circleModify);
-							model.getShapes().clear();
-							model.getShapes().addAll(shapeService.getAll());
-
-							frame.getBtnUndo().setEnabled(true);
-							frame.getBtnRedo().setEnabled(false);
-						}
-
-					} catch (Exception ex) {
-						JOptionPane.showMessageDialog(null, ex.getMessage());
-					}
-					break;
-					//Krofna
-				case "Donut":
-					try {
-						Donut d = (Donut) shape;
-						Donut donut = donutDialog(d.getCenter().getX(), d.getCenter().getY(), d.getInnerRadius(),
-								d.getRadius(), d.getInnerColor(), d.getOuterColor(), true);
-						if (donut != null) {
-							donut.setSelected(true);
-							
-							String[] attributes = d.getName().split(",");
-							String name = attributes[0];
-							donut.setNameString(name + "," + donut.toString());
-							int index = model.getShapes().indexOf(shape);
-							
-							DonutModify donutModify = new DonutModify(model, d, donut, index,
-									d.getName() + ",Modify to," + donut.getName(), selectedObjects);
-							commandManager.execute(donutModify);
-
-							frame.getBtnUndo().setEnabled(true);
-							frame.getBtnRedo().setEnabled(false);
-						}
-
-					} catch (Exception ex) {
-						JOptionPane.showMessageDialog(null, ex.getMessage());
-					}
-					break;
-					//Heksagon
-				case "HexagonAdapter":
-					try {
-						HexagonAdapter h = (HexagonAdapter) shape;
-						HexagonAdapter hex = hexDialog(h.getX(), h.getY(), h.getR(), h.getInnerColor(), h.getOuterColor(), true);
-						
-						if (hex != null) {
-							hex.setSelected(true);
-							
-							String[] attributes = h.getName().split(",");
-							String name = attributes[0];
-							hex.setNameString(name + "," + hex.toString());
-							int index = model.getShapes().indexOf(shape);
-							
-							HexModify hexModify = new HexModify(model, h, hex, index, h.getName() + ",Modify to," + hex.getName(), selectedObjects);
-							commandManager.execute(hexModify);
-							
-							frame.getBtnUndo().setEnabled(true);
-							frame.getBtnRedo().setEnabled(false);
-						}
-						
-					} catch (Exception ex) {
-						JOptionPane.showMessageDialog(null, ex.getMessage());
-					}
-					break;
-					
-				default:
-					
-					break;
+					case "Line":
+						newShape = lineDialog((Line) shape, true);
+						break;
+					case "Rectangle":
+						newShape = rectDialog((Rectangle) shape, true);
+						break;
+					case "Circle":
+						newShape = circleDialog((Circle) shape, true);
+						break;
+					case "Donut":
+						newShape = donutDialog((Donut) shape, true);
+						break;
+					case "HexagonAdapter":
+						newShape = hexDialog((HexagonAdapter) shape, true);
+						break;
+					default:
+						newShape = null;
 				}
-				
+				if(newShape == null)
+					return;
+
+				newShape.setSelected(true);
+				newShape.setId(shape.getId());
+				newShape.setNameString(newShape.getId()+ "," + shape);
+				ShapeModify shapeModify = new ShapeModify(shapeService, shape, newShape, selectedObjects);
+				commandManager.execute(shapeModify);
+				model.getShapes().clear();
+				model.getShapes().addAll(shapeService.getAll());
+
+				frame.getBtnUndo().setEnabled(true);
+				frame.getBtnRedo().setEnabled(false);
+
 				frame.getView().repaint();
 			} else {
 				JOptionPane.showMessageDialog(null, "Izaberite 1 objekat!");
@@ -519,56 +404,47 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 	
 	//Metode za dijaloge
 	
-	private Point pointDialog(int x, int y, Color outerColor, boolean editable) {
-		Point p = new Point(x,y, outerColor);
-		PointDialog dlg = new PointDialog(p, editable);
+	private Point pointDialog(Point point, boolean editable) {
+		PointDialog dlg = new PointDialog(point, editable);
 		dlg.setVisible(true);
 		
 		if(dlg.isAccepted()) {
-			x = Integer.parseInt(dlg.getTextFieldX());
-			y = Integer.parseInt(dlg.getTextFieldY());
-			outerColor = dlg.getBtnColor();
+			int x = Integer.parseInt(dlg.getTextFieldX());
+			int y = Integer.parseInt(dlg.getTextFieldY());
+			Color outerColor = dlg.getBtnColor();
 			return new Point(x, y, outerColor);
 		}
 		
 		return null;
 	}
 	
-	private Line lineDialog(int x1, int y1, int x2, int y2, Color outerColor, boolean editable) {
-
-		Line line = new Line(new Point(x1, y1), new Point(x2, y2), outerColor);
-		LineDialog dlg = new LineDialog(line, editable);;
+	private Line lineDialog(Line line, boolean editable) {
+		LineDialog dlg = new LineDialog(line, editable);
 		dlg.setVisible(true);
 
 		if (dlg.isAccepted()) {
-			x1 = Integer.parseInt(dlg.getTextFieldX());
-			y1 = Integer.parseInt(dlg.getTextFieldY());
-			x2 = Integer.parseInt(dlg.getTextFieldX2());
-			y2 = Integer.parseInt(dlg.getTextFieldY2());
-			outerColor = dlg.getBtnColor();
+			int x1 = Integer.parseInt(dlg.getTextFieldX());
+			int y1 = Integer.parseInt(dlg.getTextFieldY());
+			int x2 = Integer.parseInt(dlg.getTextFieldX2());
+			int y2 = Integer.parseInt(dlg.getTextFieldY2());
+			Color outerColor = dlg.getBtnColor();
 			return new Line(new Point(x1, y1), new Point(x2, y2), outerColor);
 		}
 
 		return null;
 	}
 	
-	private Rectangle rectDialog(int x, int y, int height, int width, Color innerColor, Color outerColor,
-			boolean editable) throws Exception {
-		Rectangle rectangle = new Rectangle(new Point(x, y, innerColor), width, height, innerColor, outerColor);
+	private Rectangle rectDialog(Rectangle rectangle, boolean editable){
 		RectangleDialog dlg = new RectangleDialog(rectangle, editable);
-		if (editable) {
-			dlg.getTextFieldHeight().setText(String.valueOf(height));
-			dlg.getTextFieldWidth().setText(String.valueOf(width));
-		}
 		dlg.setVisible(true);
 
 		if (dlg.isAccepted()) {
-			x = Integer.parseInt(dlg.getTextFieldX().getText());
-			y = Integer.parseInt(dlg.getTextFieldY().getText());
-			innerColor = dlg.getBtnInnerColor().getBackground();
-			outerColor = dlg.getBtnOuterColor().getBackground();
-			height = Integer.parseInt(dlg.getTextFieldHeight().getText());
-			width = Integer.parseInt(dlg.getTextFieldWidth().getText());
+			int x = Integer.parseInt(dlg.getTextFieldX().getText());
+			int y = Integer.parseInt(dlg.getTextFieldY().getText());
+			Color innerColor = dlg.getBtnInnerColor().getBackground();
+			Color outerColor = dlg.getBtnOuterColor().getBackground();
+			int height = Integer.parseInt(dlg.getTextFieldHeight().getText());
+			int width = Integer.parseInt(dlg.getTextFieldWidth().getText());
 
 			Point p = new Point(x, y);
 			return new Rectangle(p, width, height, innerColor, outerColor);
@@ -577,46 +453,36 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		return null;
 	}
 	
-	private Circle circleDialog(int x, int y, int radius, Color innerColor, Color outerColor, boolean editable)
-			throws Exception {
+	private Circle circleDialog(Circle circle, boolean editable){
 
-		Circle circle = new Circle(new Point(x, y), radius, innerColor, outerColor);
 		CircleDialog dlg = new CircleDialog(circle, editable);
-		if (editable)
-			dlg.getTextFieldRadius().setText(String.valueOf(radius));
 		dlg.setVisible(true);
 
 		if (dlg.isAccepted()) {
 
-			x = Integer.parseInt(dlg.getTextFieldX().getText());
-			y = Integer.parseInt(dlg.getTextFieldY().getText());
-			radius = Integer.parseInt(dlg.getTextFieldRadius().getText());
-			innerColor = dlg.getBtnInnerColor().getBackground();
-			outerColor = dlg.getBtnOuterColor().getBackground();
+			int x = Integer.parseInt(dlg.getTextFieldX().getText());
+			int y = Integer.parseInt(dlg.getTextFieldY().getText());
+			int radius = Integer.parseInt(dlg.getTextFieldRadius().getText());
+			Color innerColor = dlg.getBtnInnerColor().getBackground();
+			Color outerColor = dlg.getBtnOuterColor().getBackground();
 			return new Circle(new Point(x, y), radius, innerColor, outerColor);
 		}
 		return null;
 	}
 	
-	private Donut donutDialog(int x, int y, int innerRadius, int outerRadius, Color innerColor, Color outerColor,
-			boolean editable) throws Exception {
+	private Donut donutDialog(Donut donut, boolean editable){
 
-		Donut donut = new Donut(new Point(x, y), innerRadius, outerRadius, innerColor, outerColor);
 		DonutDialog dlg = new DonutDialog(donut, editable);
-		if (editable) {
-			dlg.getTextFieldInRadius().setText(String.valueOf(innerRadius));
-			dlg.getTextFieldOutRadius().setText(String.valueOf(outerRadius));
-		}
 		dlg.setVisible(true);
 
 		if (dlg.isAccepted()) {
 
-			x = Integer.parseInt(dlg.getTextFieldX().getText());
-			y = Integer.parseInt(dlg.getTextFieldY().getText());
-			innerRadius = Integer.parseInt(dlg.getTextFieldInRadius().getText());
-			outerRadius = Integer.parseInt(dlg.getTextFieldOutRadius().getText());
-			innerColor = dlg.getBtnInnerColor().getBackground();
-			outerColor = dlg.getBtnOuterColor().getBackground();
+			int x = Integer.parseInt(dlg.getTextFieldX().getText());
+			int y = Integer.parseInt(dlg.getTextFieldY().getText());
+			int innerRadius = Integer.parseInt(dlg.getTextFieldInRadius().getText());
+			int outerRadius = Integer.parseInt(dlg.getTextFieldOutRadius().getText());
+			Color innerColor = dlg.getBtnInnerColor().getBackground();
+			Color outerColor = dlg.getBtnOuterColor().getBackground();
 			if(innerRadius == 0)
 				JOptionPane.showMessageDialog(new JFrame(), "Inner radius must be greater than 0","Error", JOptionPane.WARNING_MESSAGE);
 			else if (innerRadius >= outerRadius)
@@ -627,23 +493,17 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		return null;
 	}
 	
-	private HexagonAdapter hexDialog(int x, int y, int radius, Color innerColor, Color outerColor, boolean editable) {
+	private HexagonAdapter hexDialog(HexagonAdapter hexagon, boolean editable) {
 
-		HexagonAdapter hexagon = new HexagonAdapter(x, y, radius, innerColor, outerColor);
 		HexagonDialog dlg = new HexagonDialog(hexagon, editable);
-
-		if (editable) {
-			dlg.getTextFieldRadius().setText(String.valueOf(radius));
-		}
 		dlg.setVisible(true);
 
 		if (dlg.isAccepted()) {
-
-			x = Integer.parseInt(dlg.getTextFieldX().getText());
-			y = Integer.parseInt(dlg.getTextFieldY().getText());
-			radius = Integer.parseInt(dlg.getTextFieldRadius().getText());
-			innerColor = dlg.getBtnInnerColor().getBackground();
-			outerColor = dlg.getBtnOuterColor().getBackground();
+			int x = Integer.parseInt(dlg.getTextFieldX().getText());
+			int y = Integer.parseInt(dlg.getTextFieldY().getText());
+			int radius = Integer.parseInt(dlg.getTextFieldRadius().getText());
+			Color innerColor = dlg.getBtnInnerColor().getBackground();
+			Color outerColor = dlg.getBtnOuterColor().getBackground();
 
 			return new HexagonAdapter(x, y, radius, innerColor, outerColor);
 		}
@@ -1040,8 +900,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				circle.setSelected(true);
 				circle.setNameString(name + "," + circle.toString());
 
-				CircleModify circleModify = new CircleModify(shapeService, c, circle, selectedObjects);
-				commandManager.execute(circleModify);
+				ShapeModify shapeModify = new ShapeModify(shapeService, c, circle, selectedObjects);
+				commandManager.execute(shapeModify);
 
 				frame.getBtnUndo().setEnabled(true);
 				frame.getBtnRedo().setEnabled(false);
@@ -1075,9 +935,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				donut.setSelected(true);
 				donut.setNameString(name + "," + donut.toString());
 
-				DonutModify donutModify = new DonutModify(model, d, donut, index,
-						d.getName() + ",Modify to," + donut.getName(), selectedObjects);
-				commandManager.execute(donutModify);
+				ShapeModify shapeModify = new ShapeModify(shapeService, d, donut, selectedObjects);
+				commandManager.execute(shapeModify);
 
 				frame.getBtnUndo().setEnabled(true);
 				frame.getBtnRedo().setEnabled(false);
