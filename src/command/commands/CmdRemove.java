@@ -2,37 +2,32 @@ package command.commands;
 
 import command.Command;
 import geometry.Shape;
+import model.service.IShapeService;
 import mvc.DrawingModel;
 import observer.SelectedObjects;
 
 public class CmdRemove implements Command {
-	
-	private DrawingModel model;
+
+	private IShapeService service;
 	private Shape shape;
 	private String nameString;
-	private int index;
-	private SelectedObjects selectedObjects;
 	
 	
-	public CmdRemove(DrawingModel model, Shape shape, int index, String nameString, SelectedObjects selectedObjects) {
-		this.model = model;
+	public CmdRemove(IShapeService service, Shape shape) {
+		this.service = service;
 		this.shape = shape;
-		this.index = index;
-		this.nameString = nameString;
-		this.selectedObjects = selectedObjects;
 	}
 	
 	@Override
 	public void execute() {
-		selectedObjects.remove(shape);
-		model.remove(shape);
+		service.delete(shape.getId());
+		nameString = service.getLastLog();
 	}
 	
 	@Override
 	public void unexecute() {
-		shape.setSelected(true);
-		selectedObjects.add(shape);
-		model.getShapes().add(index, shape);
+		service.create(shape);
+		nameString = service.getLastLog();
 	}
 	
 	@Override

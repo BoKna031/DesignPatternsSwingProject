@@ -43,7 +43,7 @@ public class ShapeService implements IShapeService{
         if(shapeRepository.read(entity.getId()) == null)
             return null;
         Shape oldShape = shapeRepository.update(entity);
-        logRepository.addLog(oldShape.getName() + ",Modify to," + entity.getName());
+        logRepository.addLog(oldShape.getId()+ "," + oldShape + ",Modify to," + entity.getId()+ "," + entity);
         return entity;
     }
 
@@ -51,7 +51,7 @@ public class ShapeService implements IShapeService{
     public Shape delete(String id) {
         Shape deletedShape = shapeRepository.delete(id);
         if(deletedShape != null)
-            logRepository.addLog(deletedShape.getName() + " - Deleted");
+            logRepository.addLog(deletedShape.getId()+ "," + deletedShape + " - Deleted");
         return deletedShape;
     }
 
@@ -91,7 +91,7 @@ public class ShapeService implements IShapeService{
             throw new NoSuchFieldException("Shape with id " + id + " doesn't exists");
         if(!shape.isSelected()){
             shape.setSelected(true);
-            logRepository.addLog(shape.getName() + " - Selected");
+            logRepository.addLog(shape.getId()+ "," + shape  + " - Selected");
         }
     }
 
@@ -102,7 +102,7 @@ public class ShapeService implements IShapeService{
             throw new NoSuchFieldException("Shape with id " + id + " doesn't exists");
         if(shape.isSelected()){
             shape.setSelected(false);
-            logRepository.addLog(shape.getName() + " - Deselected");
+            logRepository.addLog(shape.getId()+ "," + shape  + " - Deselected");
         }
     }
 

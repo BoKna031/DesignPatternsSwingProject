@@ -113,40 +113,26 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		
 	}
 
-	private Shape lineBtnClicked(Point point) {
-		if(frame.startPoint == null) {
-			frame.startPoint = point;
-			return null;
+	private void preformDelete(){
+		for(Shape s: shapeService.getSelected()){
+			CmdRemove cmdRemove = new CmdRemove(shapeService, s);
+			commandManager.execute(cmdRemove);
 		}
-		Point p1 = frame.startPoint;
-		Point p2 = point;
-
-
-		Shape line = lineDialog(new Line(p1,p2,p2.getColor()), false);
-		frame.startPoint = null;
-		return line;
+		frame.getBtnUndo().setEnabled(true);
+		frame.getBtnRedo().setEnabled(false);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
 		//DELETE
-		if (e.getSource() == frame.getBtnDelete() && model.getShapes().size() > 0 && selectedObjects.size() > 0) {
+		if (e.getSource() == frame.getBtnDelete()) {
 			int input = JOptionPane.showConfirmDialog(null, "Da li ste sigurni?");
-			if (input == 0) {
-				while (selectedObjects.size() > 0) {
-					Shape shape = selectedObjects.get(0);
-					if(shape.isSelected()) {
-						int index = model.getShapes().indexOf(shape);
-						CmdRemove cmdRemove = new CmdRemove(model, shape, index, shape.getName() + " - Deleted");
-						selectedObjects.remove(shape);
-						commandManager.execute(cmdRemove);
-						
-						frame.getBtnUndo().setEnabled(true);
-						frame.getBtnRedo().setEnabled(false);
-					}
-				}
+			if (input == JOptionPane.YES_OPTION) {
+				preformDelete();
 				notifyAllObservers(selectedObjects.size());
+				model.getShapes().clear();
+				model.getShapes().addAll(shapeService.getAll());
 				frame.getView().repaint();
 			}
 		}
@@ -950,5 +936,19 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 			return true;
 		}
 		return false;
+	}
+
+	private Shape lineBtnClicked(Point point) {
+		if(frame.startPoint == null) {
+			frame.startPoint = point;
+			return null;
+		}
+		Point p1 = frame.startPoint;
+		Point p2 = point;
+
+
+		Shape line = lineDialog(new Line(p1,p2,p2.getColor()), false);
+		frame.startPoint = null;
+		return line;
 	}
 }
