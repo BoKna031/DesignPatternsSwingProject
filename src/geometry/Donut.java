@@ -14,12 +14,12 @@ public class Donut extends Circle {
 
 	}
 
-	public Donut(Point center, int innerRadius, int radius) throws Exception {
+	public Donut(Point center, int innerRadius, int radius){
 		super(center, radius);
 		this.innerRadius = innerRadius;
 	}
 	
-	public Donut(Point center, int innerRadius, int radius, Color innerColor, Color outerColor) throws Exception {
+	public Donut(Point center, int innerRadius, int radius, Color innerColor, Color outerColor) {
 		this(center, innerRadius, radius);
 		super.setInnerColor(innerColor);
 		super.setOuterColor(outerColor);
