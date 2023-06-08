@@ -26,18 +26,11 @@ import dialogs.HexagonDialog;
 import dialogs.LineDialog;
 import dialogs.PointDialog;
 import dialogs.RectangleDialog;
-import geometry.Circle;
-import geometry.Donut;
-import geometry.HexagonAdapter;
-import geometry.Line;
-import geometry.Point;
-import geometry.Rectangle;
-import geometry.Shape;
+import geometry.*;
 import model.service.IShapeService;
 import model.service.ShapeService;
 import observer.Observer;
 import observer.ObserverUpdate;
-import observer.SelectedObjects;
 
 public class DrawingController extends MouseAdapter implements ActionListener {
 
@@ -76,6 +69,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 
 		if(frame.getBtnSelect().isSelected()) {
 			selectBtnClicked(x,y);
+			frame.getView().repaint();
 			return;
 		}
 
@@ -84,7 +78,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		if (frame.getBtnPoint().isSelected()) {
 			newShape = pointDialog(new Point(x, y, outerColor), false);
 		} else if (frame.getBtnLine().isSelected()) {
-			newShape = lineBtnClicked(p);
+			newShape = lineBtnClicked(p,outerColor);
 			if(newShape == null)
 				return;
 		} else if (frame.getBtnRectangle().isSelected()) {
@@ -139,8 +133,9 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		
 		//MODIFY
 		else if (e.getSource() == frame.getBtnModify()) {
-			if (selectedObjects.size() == 1) {
-				Shape shape = selectedObjects.get(0);
+			if (shapeService.getSelected().size() == 1) {
+				ArrayList<Shape> selectedShapes = (ArrayList<Shape>)shapeService.getSelected();
+				Shape shape = selectedShapes.get(0);
 				String s = shape.getClass().getSimpleName();
 				Shape newShape;
 				switch (s) {
@@ -194,6 +189,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 			else
 				frame.getBtnUndo().setEnabled(true);
 			notifyAllObservers(selectedObjects.size());
+			model.getShapes().clear();
+			model.getShapes().addAll(shapeService.getAll());
 			frame.getView().repaint();
 		}
 		
@@ -207,6 +204,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 			else
 				frame.getBtnRedo().setEnabled(true);
 			notifyAllObservers(selectedObjects.size());
+			model.getShapes().clear();
+			model.getShapes().addAll(shapeService.getAll());
 			frame.getView().repaint();
 		}
 		
@@ -385,31 +384,12 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 	}
 	
 	private void notifyAllObservers(int size) {
-		
-		if (size > 0) {
-			if (size == 1) {
-				observer.setButtonModifyEnabled(true);
-				observer.setButtonBringBackEnabled(true);
-				observer.setButtonBringFrontEnabled(true);
-				observer.setButtonToBackEnabled(true);
-				observer.setButtonToFrontEnabled(true);
-			} else {
-				observer.setButtonModifyEnabled(false);
-				observer.setButtonBringBackEnabled(false);
-				observer.setButtonBringFrontEnabled(false);
-				observer.setButtonToBackEnabled(false);
-				observer.setButtonToFrontEnabled(false);
-				
-			}
-			observer.setButtonDeleteEnabled(true);
-		} else {
-				observer.setButtonDeleteEnabled(false);
-				observer.setButtonModifyEnabled(false);
-				observer.setButtonBringBackEnabled(false);
-				observer.setButtonBringFrontEnabled(false);
-				observer.setButtonToBackEnabled(false);
-				observer.setButtonToFrontEnabled(false);
-		}
+		observer.setButtonDeleteEnabled(size>0);
+		observer.setButtonModifyEnabled(size == 1);
+		observer.setButtonBringBackEnabled(size == 1);
+		observer.setButtonBringFrontEnabled(size == 1);
+		observer.setButtonToBackEnabled(size == 1);
+		observer.setButtonToFrontEnabled(size == 1);
 	}
 	
 	public void save(File file) throws IOException {
@@ -450,7 +430,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		frame.getBtnRedo().setEnabled(false);
 		
 		model.getShapes().clear();
-		selectedObjects.clear();
+
 		commandManager.clearNormal();
 		commandManager.clearReverse();
 		notifyAllObservers(0);
@@ -469,20 +449,20 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		}
 	}
 	
-	public void loadNext() throws Exception {
+	public void loadNext() {
 		
 		String line = temporarilyLogs.get(i);
-		Shape shape = null;
+		Shape shape;
 		
 		if (line.contains("Undo")) {
 			commandManager.undo();
-			notifyAllObservers(selectedObjects.size());
+			notifyAllObservers(shapeService.getSelected().size());
 			
 		} else if (line.contains("Redo")) {
 			commandManager.redo();
 			notifyAllObservers(selectedObjects.size());
 		} else if (line.contains("To Front")) {
-			
+			/*
 			shape = selectedObjects.get(0);
 			int index = model.getShapes().indexOf(shape);
 			
@@ -492,9 +472,11 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 			frame.getBtnUndo().setEnabled(true);
 			frame.getBtnRedo().setEnabled(false);
 			frame.getView().repaint();
+
+			 */
 			
 		} else if (line.contains("To Back")) {
-			
+			/*
 			shape = selectedObjects.get(0);
 			int index = model.getShapes().indexOf(shape);
 			CmdToBack cmd = new CmdToBack(model, shape, index, shape.getName() + " - To Back");
@@ -503,9 +485,9 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 			frame.getBtnUndo().setEnabled(true);
 			frame.getBtnRedo().setEnabled(false);
 			frame.getView().repaint();
-			
+			*/
 		} else if (line.contains("Bring Front")) {
-			
+			/*
 			shape = selectedObjects.get(0);
 			int index = model.getShapes().indexOf(shape);
 			int length = model.getShapes().size();
@@ -515,9 +497,9 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 			frame.getBtnUndo().setEnabled(true);
 			frame.getBtnRedo().setEnabled(false);
 			frame.getView().repaint();
-			
+			*/
 		} else if (line.contains("Bring Back")) {
-			
+			/*
 			shape = selectedObjects.get(0);
 			int index = model.getShapes().indexOf(shape);
 			CmdBringToBack cmd = new CmdBringToBack(model, shape, index, shape.getName() + " - Bring Back");
@@ -526,373 +508,54 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 			frame.getBtnUndo().setEnabled(true);
 			frame.getBtnRedo().setEnabled(false);
 			frame.getView().repaint();
+
+			 */
 		} else if (line.contains("Add")) {
 			line = line.replaceAll(" - Add", "");
-			if(line.contains("Point")) {
-				String[] attributes = line.split(",");
-				int x = Integer.parseInt(attributes[2]);
-				int y = Integer.parseInt(attributes[4]);
-				Color color = new Color(Integer.parseInt(attributes[6]));
-				
-				Point point = new Point(x, y, color);
-				
-				//point.setNameString("Point" + pointerCount++ + "," + point.toString() + ",color," + String.valueOf(point.getColor().getRGB()));
-				
-				//CmdAdd cmd = new CmdAdd(model, point, point.getName() + " - Add");
-				//commandManager.execute(cmd);
-				
-				frame.getBtnUndo().setEnabled(true);
-				frame.getBtnRedo().setEnabled(false);
-				
-				
-			}  else if (line.contains("Line")) {
-				
-				String[] attributes = line.split(",");
-				int x1 = Integer.parseInt(attributes[2]);
-				int y1 = Integer.parseInt(attributes[4]);
-				int x2 = Integer.parseInt(attributes[6]);
-				int y2 = Integer.parseInt(attributes[8]);
-				Color color = new Color(Integer.parseInt(attributes[10]));
-				
-				Point startPoint = new Point(x1, y1);
-				Point endPoint = new Point(x2, y2);
-				
-				Line lineObject = new Line(startPoint, endPoint, color);
-				
-				//lineObject.setNameString("Line" + lineCount++ + "," + lineObject.toString());
-				
-				//CmdAdd cmd =  new CmdAdd(model, lineObject, lineObject.getName() + " - Add");
-				//commandManager.execute(cmd);
-				frame.getBtnUndo().setEnabled(true);
-				frame.getBtnRedo().setEnabled(false);
-				
-			} else if (line.contains("Rectangle")) {
+			shape = Converter.StringToShape(line);
+			CmdAdd cmd = new CmdAdd(shapeService,shape);
+			commandManager.execute(cmd);
+			model.getShapes().clear();
+			model.getShapes().addAll(shapeService.getAll());
+			frame.getBtnUndo().setEnabled(true);
+			frame.getBtnRedo().setEnabled(false);
 
-				String[] attributes = line.split(",");
-				int x = Integer.parseInt(attributes[2]);
-				int y = Integer.parseInt(attributes[4]);
-				int height = Integer.parseInt(attributes[6]);
-				int width = Integer.parseInt(attributes[8]);
-				Color outerColor = new Color(Integer.parseInt(attributes[10]));
-				Color innerColor = new Color(Integer.parseInt(attributes[12]));
-
-				Point upperLeftPoint = new Point(x, y);
-
-				Rectangle rect = new Rectangle(upperLeftPoint, width, height, innerColor, outerColor);
-
-				//rect.setNameString("Rectangle" + rectangleCount++ + "," + rect.toString());
-				//CmdAdd cmd = new CmdAdd(model, rect, rect.getName() + " - Add");
-				//commandManager.execute(cmd);
-				frame.getBtnUndo().setEnabled(true);
-				frame.getBtnRedo().setEnabled(false);
-				
-			} else if (line.contains("Circle")) {
-
-				String[] attributes = line.split(",");
-				int x = Integer.parseInt(attributes[2]);
-				int y = Integer.parseInt(attributes[4]);
-				int radius = Integer.parseInt(attributes[6]);
-				Color outerColor = new Color(Integer.parseInt(attributes[8]));
-				Color innerColor = new Color(Integer.parseInt(attributes[10]));
-
-				Point center = new Point(x, y);
-
-				Circle circle = new Circle(center, radius, innerColor, outerColor);
-
-				//circle.setNameString("Circle" + circleCount++ + "," + circle.toString());
-				//CmdAdd cmd = new CmdAdd(model, circle, circle.getName() + " - Add");
-				//commandManager.execute(cmd);
-				frame.getBtnUndo().setEnabled(true);
-				frame.getBtnRedo().setEnabled(false);
-
-			} else if (line.contains("Donut")) {
-
-				String[] attributes = line.split(",");
-				int x = Integer.parseInt(attributes[2]);
-				int y = Integer.parseInt(attributes[4]);
-				int radius = Integer.parseInt(attributes[6]);
-				Color outerColor = new Color(Integer.parseInt(attributes[8]));
-				Color innerColor = new Color(Integer.parseInt(attributes[10]));
-				int innerRadius = Integer.parseInt(attributes[12]);
-
-				Point center = new Point(x, y);
-
-				Donut donut = new Donut(center, innerRadius, radius, innerColor, outerColor);
-
-				//donut.setNameString("Donut" + donutCount++ + "," + donut.toString());
-				//CmdAdd cmd = new CmdAdd(model, donut, donut.getName() + " - Add");
-				//commandManager.execute(cmd);
-				frame.getBtnUndo().setEnabled(true);
-				frame.getBtnRedo().setEnabled(false);
-				
-				
-			} else if (line.contains("Hexagon")) {
-
-				String[] attributes = line.split(",");
-				int x = Integer.parseInt(attributes[2]);
-				int y = Integer.parseInt(attributes[4]);
-				int radius = Integer.parseInt(attributes[6]);
-				Color outerColor = new Color(Integer.parseInt(attributes[8]));
-				Color innerColor = new Color(Integer.parseInt(attributes[10]));
-
-
-				HexagonAdapter hex = new HexagonAdapter(x, y, radius, innerColor, outerColor);
-
-				//hex.setNameString("Hexagon" + hexagonCount++ + "," + hex.toString());
-				//CmdAdd cmd = new CmdAdd(model, hex, hex.getName() + " - Add");
-				//commandManager.execute(cmd);
-				frame.getBtnUndo().setEnabled(true);
-				frame.getBtnRedo().setEnabled(false);
-					
-			}
 		} else if (line.contains("Modify to")) {
-			
-			String[] splitString = line.split(",Modify to");
-			line = line.replace(",Modify to", "");
-			if (line.contains("Point")) {
-				
-				Point p = new Point();
-				int index = 0;
-				
-				for (int i = 0; i < model.getShapes().size(); i++) {
-					if (splitString[0].equals(model.get(i).getName())) {
-						p = (Point) model.get(i);
-						index = model.getShapes().indexOf(p);
-						break;
-					}
-				}
-				
-				String[] attributes = line.split(",");
-				
-				String name = attributes[7];
-				int x = Integer.parseInt(attributes[9]);
-				int y = Integer.parseInt(attributes[11]);
-				Color color = new Color(Integer.parseInt(attributes[13]));
-				
-				Point point = new Point(x, y, color);
-				point.setSelected(true);
-				point.setNameString(name + "," +point.toString() + ",color," + String.valueOf(point.getColor().getRGB()));
-				
-				//PointModify pointModify = new PointModify(model, p, point, index, p.getName() + ",Modify to," + point.getName(), selectedObjects);
-				//commandManager.execute(pointModify);
-				
-				frame.getBtnUndo().setEnabled(true);
-				frame.getBtnRedo().setEnabled(false);
-				
-			} else if (line.contains("Line")) {
-				
-				Line l = new Line();
-				int index = 0;
-				
-				for (int i = 0; i < model.getShapes().size(); i++) {
-					if (splitString[0].equals(model.get(i).getName())) {
-						l = (Line) model.get(i);
-						index = model.getShapes().indexOf(l);
-						break;
-					}
-				}
-				
-				String[] attributes = line.split(",");
-				String name = attributes[11];
-				int x1 = Integer.parseInt(attributes[13]);
-				int y1 = Integer.parseInt(attributes[15]);
-				int x2 = Integer.parseInt(attributes[17]);
-				int y2 = Integer.parseInt(attributes[19]);
-				Color color = new Color(Integer.parseInt(attributes[21]));
-				Point startPoint = new Point(x1, y1);
-				Point endPoint = new Point(x2, y2);
-				
-				Line line2 = new Line(startPoint, endPoint, color);
-				line2.setSelected(true);
-				line2.setNameString(name + "," + line2.toString());
-				
-				//LineModify lineModify = new LineModify(model, l, line2, index, l.getName() + ",Modify to," + line2.getName(), selectedObjects);
-				//commandManager.execute(lineModify);
-				
-				frame.getBtnUndo().setEnabled(true);
-				frame.getBtnRedo().setEnabled(false);
-				
-			} else if (line.contains("Rectangle")) {
-				
-				Rectangle r = new Rectangle();
-				int index = 0;
-				
-				for (int i = 0; i < model.getShapes().size(); i++) {
-					if (splitString[0].equals(model.get(i).getName())) {
-						r = (Rectangle) model.get(i);
-						index = model.getShapes().indexOf(r);
-						break;
-					}
-				}
-				
-				String[] attributes = line.split(",");
-				
-				String name = attributes[13];
-				int x = Integer.parseInt(attributes[15]);
-				int y = Integer.parseInt(attributes[17]);
-				int height = Integer.parseInt(attributes[19]);
-				int width = Integer.parseInt(attributes[21]);
-				Color outerColor = new Color(Integer.parseInt(attributes[23]));
-				Color innerColor = new Color(Integer.parseInt(attributes[25]));
-				Point point = new Point(x, y);
-				
-				Rectangle rectangle = new Rectangle(point, width, height, innerColor, outerColor);
-				rectangle.setSelected(true);
-				rectangle.setNameString(name + "," + rectangle.toString());
-				
-				//RectangleModify rectangleModify = new RectangleModify(model, r, rectangle, index, r.getName() + ",Modify to," + rectangle.getName(), selectedObjects);
-				//commandManager.execute(rectangleModify);
-				
-				frame.getBtnUndo().setEnabled(true);
-				frame.getBtnRedo().setEnabled(false);
-				
-			} else if (line.contains("Circle")) {
+			String[] shapeDescriptions = line.split(",Modify to ");
+			Shape oldShape = Converter.StringToShape(shapeDescriptions[0]);
+			shape = Converter.StringToShape(shapeDescriptions[1]);
 
-				Circle c = new Circle();
-				int index = 0;
+			ShapeModify shapeModify = new ShapeModify(shapeService, oldShape, shape);
+			commandManager.execute(shapeModify);
+			model.getShapes().clear();
+			model.getShapes().addAll(shapeService.getAll());
 
-				for (int i = 0; i < model.getShapes().size(); i++) {
-					if (splitString[0].equals(model.get(i).getName())) {
-						c = (Circle) model.get(i);
-						index = model.getShapes().indexOf(c);
-						break;
-					}
-				}
-
-				String[] attributes = line.split(",");
-
-				String name = attributes[11];
-				int x = Integer.parseInt(attributes[13]);
-				int y = Integer.parseInt(attributes[15]);
-				int radius = Integer.parseInt(attributes[17]);
-				Color outerColor = new Color(Integer.parseInt(attributes[19]));
-				Color innerColor = new Color(Integer.parseInt(attributes[21]));
-				Point center = new Point(x, y);
-
-				Circle circle = new Circle(center, radius, innerColor, outerColor);
-				circle.setSelected(true);
-				circle.setNameString(name + "," + circle.toString());
-
-				//ShapeModify shapeModify = new ShapeModify(shapeService, c, circle, selectedObjects);
-				//commandManager.execute(shapeModify);
-
-				frame.getBtnUndo().setEnabled(true);
-				frame.getBtnRedo().setEnabled(false);
-
+			frame.getBtnUndo().setEnabled(true);
+			frame.getBtnRedo().setEnabled(false);
 				
-			} else if (line.contains("Donut")) {
-				
-				Donut d = new Donut();
-				int index = 0;
+		} else if (line.contains("Deleted")) {
+			shape = Converter.StringToShape(line);
+			CmdRemove cmdDelete = new CmdRemove(shapeService, shape);
+			commandManager.execute(cmdDelete);
 
-				for (int i = 0; i < model.getShapes().size(); i++) {
-					if (splitString[0].equals(model.get(i).getName())) {
-						d = (Donut) model.get(i);
-						index = model.getShapes().indexOf(d);
-						break;
-					}
-				}
-
-				String[] attributes = line.split(",");
-
-				String name = attributes[13];
-				int x = Integer.parseInt(attributes[15]);
-				int y = Integer.parseInt(attributes[17]);
-				int radius = Integer.parseInt(attributes[19]);
-				Color outerColor = new Color(Integer.parseInt(attributes[21]));
-				Color innerColor = new Color(Integer.parseInt(attributes[23]));
-				int innerRadius = Integer.parseInt(attributes[25]);
-				Point center = new Point(x, y);
-
-				Donut donut = new Donut(center, innerRadius, radius, innerColor, outerColor);
-				donut.setSelected(true);
-				donut.setNameString(name + "," + donut.toString());
-
-				//ShapeModify shapeModify = new ShapeModify(shapeService, d, donut, selectedObjects);
-				//commandManager.execute(shapeModify);
-
-				frame.getBtnUndo().setEnabled(true);
-				frame.getBtnRedo().setEnabled(false);
-
-				
-			} else if (line.contains("Hexagon")) {
-				
-				HexagonAdapter h = new HexagonAdapter();
-				int index = 0;
-				
-				for (int i = 0; i < model.getShapes().size(); i++) {
-					if (splitString[0].equals(model.get(i).getName())) {
-						h = (HexagonAdapter) model.get(i);
-						index = model.getShapes().indexOf(h);
-						break;
-					}
-				}
-				
-				String[] attributes = line.split(",");
-				
-				String name = attributes[11];
-				int x = Integer.parseInt(attributes[13]);
-				int y = Integer.parseInt(attributes[15]);
-				int radius = Integer.parseInt(attributes[17]);
-				Color outerColor = new Color(Integer.parseInt(attributes[19]));
-				Color innerColor = new Color(Integer.parseInt(attributes[21]));
-				
-				HexagonAdapter hex = new HexagonAdapter(x, y, radius, innerColor, outerColor);
-				hex.setSelected(true);
-				hex.setNameString(name + "," + hex.toString());
-				
-				// HexModify hexModify = new HexModify(model, h, hex, index, h.getName() + ",Modify to," + hex.getName(), selectedObjects);
-				//commandManager.execute(hexModify);
-				
-				frame.getBtnUndo().setEnabled(true);
-				frame.getBtnRedo().setEnabled(false);
-		
-				
-			}
-		}
-		
-		else if (line.contains("Deleted")) {
-			line = line.replace(" - Deleted", "");
-			
-			shape = selectedObjects.get(0);
-			if (shape.isSelected()) {
-				int index = model.getShapes().indexOf(shape);
-				//CmdRemove cmdRemove = new CmdRemove(model, shape, index, shape.getName() + " - Deleted", selectedObjects);
-				//selectedObjects.remove(shape);
-				//commandManager.execute(cmdRemove);
-				
-				frame.getBtnUndo().setEnabled(true);
-				frame.getBtnRedo().setEnabled(false);
-			}
+			frame.getBtnUndo().setEnabled(true);
+			frame.getBtnRedo().setEnabled(false);
 		} else if (line.contains("Selected")) {
-			line = line.replace(" - Selected", "");
-			
-			for (int i = model.getShapes().size() - 1; i >= 0; i--) {
-				shape = model.get(i);
-				
-				if (shape.getName().equals(line)) {
-					//CmdSelect selectCommand = new CmdSelect(shape, selectedObjects, shape.getName() + " - Selected");
-					//commandManager.execute(selectCommand);
-					
-					notifyAllObservers(selectedObjects.size());
-					break;
-				}
-			}
+			shape = Converter.StringToShape(line);
+			CmdSelect cmdSelect = new CmdSelect(shapeService, shape.getId());
+			commandManager.execute(cmdSelect);
+
+			notifyAllObservers(shapeService.getSelected().size());
+			frame.getBtnUndo().setEnabled(true);
+			frame.getBtnRedo().setEnabled(false);
 		} else if (line.contains("Deselected")) {
-			
-			line = line.replace(" - Deselected", "");
-			
-			for (int i = model.getShapes().size() - 1; i >= 0; i--) {
-				shape = model.get(i);
-				
-				if (shape.getName().equals(line)) {
-					//CmdDeselect deselectCommand = new CmdDeselect(shape, selectedObjects, shape.getName() + " - Deselected");
-					//commandManager.execute(deselectCommand);
-					
-					notifyAllObservers(selectedObjects.size());
-					break;
-				}
-			}
+			shape = Converter.StringToShape(line);
+			CmdDeselect cmdDeselect = new CmdDeselect(shapeService, shape.getId());
+			commandManager.execute(cmdDeselect);
+
+			notifyAllObservers(shapeService.getSelected().size());
+			frame.getBtnUndo().setEnabled(true);
+			frame.getBtnRedo().setEnabled(false);
 		}
 		i++;
 		if (i == temporarilyLogs.size() || temporarilyLogs.get(i) == null) {
@@ -917,7 +580,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 
 	private void deselectAllObjects(){
 		for (Shape s : shapeService.getSelected()) {
-			CmdDeselect deselectCommand = new CmdDeselect(s.getId(), shapeService);
+			CmdDeselect deselectCommand = new CmdDeselect(shapeService, s.getId());
 			commandManager.execute(deselectCommand);
 		}
 	}
@@ -927,10 +590,10 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				continue;
 			}
 			if(shape.isSelected()) {
-				CmdDeselect deselectCommand = new CmdDeselect(shape.getId(), shapeService);
+				CmdDeselect deselectCommand = new CmdDeselect(shapeService, shape.getId());
 				commandManager.execute(deselectCommand);
 			}else{
-				CmdSelect selectCommand = new CmdSelect(shape.getId(), shapeService);
+				CmdSelect selectCommand = new CmdSelect(shapeService, shape.getId());
 				commandManager.execute(selectCommand);
 			}
 			return true;
@@ -938,7 +601,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		return false;
 	}
 
-	private Shape lineBtnClicked(Point point) {
+	private Shape lineBtnClicked(Point point, Color color) {
 		if(frame.startPoint == null) {
 			frame.startPoint = point;
 			return null;
@@ -947,7 +610,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		Point p2 = point;
 
 
-		Shape line = lineDialog(new Line(p1,p2,p2.getColor()), false);
+		Shape line = lineDialog(new Line(p1,p2, color), false);
 		frame.startPoint = null;
 		return line;
 	}

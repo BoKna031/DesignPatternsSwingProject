@@ -1,5 +1,6 @@
 package model.service;
 
+import geometry.Converter;
 import geometry.Shape;
 import model.repository.*;
 
@@ -29,7 +30,7 @@ public class ShapeService implements IShapeService{
     public Shape create(Shape entity) {
         Shape createdShape = shapeRepository.create(entity);
         if(createdShape != null)
-            logRepository.addLog( createdShape.getId()+ "," + createdShape+ " - Add");
+            logRepository.addLog( Converter.ShapeToString(entity) + " - Add");
         return createdShape;
     }
 
@@ -43,7 +44,7 @@ public class ShapeService implements IShapeService{
         if(shapeRepository.read(entity.getId()) == null)
             return null;
         Shape oldShape = shapeRepository.update(entity);
-        logRepository.addLog(oldShape.getId()+ "," + oldShape + ",Modify to," + entity.getId()+ "," + entity);
+        logRepository.addLog(Converter.ShapeToString(oldShape) + ",Modify to " + Converter.ShapeToString(entity));
         return entity;
     }
 
@@ -51,7 +52,7 @@ public class ShapeService implements IShapeService{
     public Shape delete(String id) {
         Shape deletedShape = shapeRepository.delete(id);
         if(deletedShape != null)
-            logRepository.addLog(deletedShape.getId()+ "," + deletedShape + " - Deleted");
+            logRepository.addLog(Converter.ShapeToString(deletedShape)+ " - Deleted");
         return deletedShape;
     }
 
@@ -91,7 +92,7 @@ public class ShapeService implements IShapeService{
             throw new NoSuchFieldException("Shape with id " + id + " doesn't exists");
         if(!shape.isSelected()){
             shape.setSelected(true);
-            logRepository.addLog(shape.getId()+ "," + shape  + " - Selected");
+            logRepository.addLog(Converter.ShapeToString(shape)  + " - Selected");
         }
     }
 
@@ -102,7 +103,7 @@ public class ShapeService implements IShapeService{
             throw new NoSuchFieldException("Shape with id " + id + " doesn't exists");
         if(shape.isSelected()){
             shape.setSelected(false);
-            logRepository.addLog(shape.getId()+ "," + shape  + " - Deselected");
+            logRepository.addLog(Converter.ShapeToString(shape)  + " - Deselected");
         }
     }
 

@@ -3,7 +3,6 @@ package command.commands;
 import command.Command;
 import geometry.Shape;
 import model.service.IShapeService;
-import observer.SelectedObjects;
 
 public class ShapeModify implements Command {
 
