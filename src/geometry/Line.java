@@ -31,6 +31,10 @@ public class Line extends Shape {
 		this.color = color;
 	}
 
+	public Line(String id, Point startPoint, Point endPoint, Color color) {
+		this(startPoint, endPoint, color);
+		setId(id);
+	}
 	public Line(Point startPoint, Point endPoint, boolean selected) {
 		this(startPoint, endPoint);
 		setSelected(selected);
@@ -135,6 +139,11 @@ public class Line extends Shape {
 	public void configureClone(Shape shapeToClone) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public ShapeType getShapeType() {
+		return ShapeType.LINE;
 	}
 
 	@Override

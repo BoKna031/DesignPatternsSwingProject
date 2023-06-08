@@ -2,7 +2,6 @@ package geometry;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.geom.Area;
 
 
 public class Donut extends Circle {
@@ -22,6 +21,11 @@ public class Donut extends Circle {
 		this(center, innerRadius, radius);
 		super.setInnerColor(innerColor);
 		super.setOuterColor(outerColor);
+	}
+
+	public Donut(String id, Point center, int innerRadius, int radius, Color innerColor, Color outerColor){
+		this(center, innerRadius, radius, innerColor, outerColor);
+		setId(id);
 	}
 
 	public void draw(Graphics g) {
@@ -120,6 +124,11 @@ public class Donut extends Circle {
 		} else {
 			this.innerRadius = innerRadius;
 		}
+	}
+
+	@Override
+	public ShapeType getShapeType() {
+		return ShapeType.DONUT;
 	}
 
 	public String toString() {

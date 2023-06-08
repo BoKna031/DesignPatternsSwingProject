@@ -49,6 +49,11 @@ public class Rectangle extends SurfaceShape {
 		this.outerColor = outerColor;
 	}
 
+	public Rectangle(String id, Point upperLeftPoint, int width, int height, Color innerColor, Color outerColor){
+		this(upperLeftPoint,width,height,innerColor,outerColor);
+		setId(id);
+	}
+
 
 	@Override
 	public void draw(Graphics g) {
@@ -152,6 +157,10 @@ public class Rectangle extends SurfaceShape {
 	public void configureClone(Shape shapeToClone) {
 		// TODO Auto-generated method stub
 		
+	}
+	@Override
+	public ShapeType getShapeType() {
+		return ShapeType.RECTANGLE;
 	}
 
 	@Override

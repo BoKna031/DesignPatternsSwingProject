@@ -33,6 +33,11 @@ public class Circle extends Shape {
 		this.innerColor = innerColor;
 		this.outerColor = outerColor;
 	}
+
+	public Circle(String id, Point center, int radius, Color innerColor, Color outerColor){
+		this(center, radius, innerColor, outerColor);
+		setId(id);
+	}
 	
 
 	@Override
@@ -135,6 +140,11 @@ public class Circle extends Shape {
 		g.drawRect(this.center.getX() - 3, this.center.getY() - this.radius - 3, 6, 6);
 		g.setColor(Color.BLACK);
 		
+	}
+
+	@Override
+	public ShapeType getShapeType() {
+		return ShapeType.CIRCLE;
 	}
 
 	@Override

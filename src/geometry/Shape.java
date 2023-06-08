@@ -8,6 +8,7 @@ public abstract class Shape implements Moveable, Comparable<Object>, Cloneable, 
 	private boolean selected;
 	public String nameString;
 	private String id;
+	private ShapeType type;
 
 	public Shape() {}
 
@@ -47,4 +48,5 @@ public abstract class Shape implements Moveable, Comparable<Object>, Cloneable, 
 		return id;
 	}
 
+	public abstract ShapeType getShapeType();
 }

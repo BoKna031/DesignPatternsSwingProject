@@ -17,6 +17,10 @@ public class HexagonAdapter extends Shape {
 		hexagon.setAreaColor(innerColor);
 		hexagon.setBorderColor(outerColor);
 	}
+	public HexagonAdapter(String id, int x, int y, int r, Color innerColor, Color outerColor) {
+		this(x, y, r, innerColor, outerColor);
+		setId(id);
+	}
 	
 	@Override
 	public void moveBy(int byX, int byY) {
@@ -95,6 +99,11 @@ public class HexagonAdapter extends Shape {
 	public void drawSelection(Graphics g) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public ShapeType getShapeType() {
+		return ShapeType.HEXAGON;
 	}
 
 	@Override

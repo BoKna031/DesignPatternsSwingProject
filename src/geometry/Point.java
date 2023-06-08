@@ -1,7 +1,5 @@
 package geometry;
 
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
-
 import java.awt.Color;
 import java.awt.Graphics;
 
@@ -28,6 +26,11 @@ public class Point extends Shape {
 	public Point(int x, int y, Color color) {
 		this(x, y);
 		this.color = color;
+	}
+
+	public Point(String id, int x, int y, Color color){
+		this(x,y,color);
+		setId(id);
 	}
 	
 	public boolean equals(Object object) {
@@ -130,6 +133,11 @@ public class Point extends Shape {
 			setSelected(pointClone.isSelected());
 		}
 		
+	}
+
+	@Override
+	public ShapeType getShapeType() {
+		return ShapeType.POINT;
 	}
 
 
