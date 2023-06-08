@@ -6,8 +6,8 @@ import model.service.IShapeService;
 
 public class CmdAdd implements Command {
 	
-	private IShapeService service;
-	private Shape shape;
+	private final IShapeService service;
+	private final Shape shape;
 	private String nameString;
 	
 	public CmdAdd(IShapeService service, Shape shape) {

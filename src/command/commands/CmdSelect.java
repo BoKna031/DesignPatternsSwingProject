@@ -1,11 +1,7 @@
 package command.commands;
 
 import command.Command;
-import geometry.Shape;
 import model.service.IShapeService;
-import observer.SelectedObjects;
-
-import java.util.List;
 
 public class CmdSelect implements Command {
 
@@ -14,7 +10,7 @@ public class CmdSelect implements Command {
 	String nameString;
 
 
-	public CmdSelect(String shapeId, IShapeService shapeService) {
+	public CmdSelect(IShapeService shapeService, String shapeId) {
 		this.shapeId = shapeId;
 		this.shapeService = shapeService;
 	}
