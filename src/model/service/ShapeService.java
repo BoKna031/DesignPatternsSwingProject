@@ -1,10 +1,12 @@
 package model.service;
 
+import geometry.Converter;
 import geometry.Shape;
 import model.repository.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -28,7 +30,7 @@ public class ShapeService implements IShapeService{
     public Shape create(Shape entity) {
         Shape createdShape = shapeRepository.create(entity);
         if(createdShape != null)
-            logRepository.addLog(createdShape.getName() + " - Add");
+            logRepository.addLog( Converter.ShapeToString(entity) + " - Add");
         return createdShape;
     }
 
@@ -39,19 +41,18 @@ public class ShapeService implements IShapeService{
 
     @Override
     public Shape update(Shape entity) {
-        Shape oldShape = shapeRepository.read(entity.getId());
-        if(oldShape == null)
+        if(shapeRepository.read(entity.getId()) == null)
             return null;
-        Shape newShape = shapeRepository.update(entity);
-        logRepository.addLog(oldShape.getName() + ",Modify to," + newShape.getName());
-        return newShape;
+        Shape oldShape = shapeRepository.update(entity);
+        logRepository.addLog(Converter.ShapeToString(oldShape) + ",Modify to " + Converter.ShapeToString(entity));
+        return entity;
     }
 
     @Override
     public Shape delete(String id) {
         Shape deletedShape = shapeRepository.delete(id);
         if(deletedShape != null)
-            logRepository.addLog(deletedShape.getName() + " - Deleted");
+            logRepository.addLog(Converter.ShapeToString(deletedShape)+ " - Deleted");
         return deletedShape;
     }
 
@@ -73,5 +74,46 @@ public class ShapeService implements IShapeService{
     @Override
     public List<String> getAllLogs() {
         return logRepository.getAllLogs();
+    }
+
+    @Override
+    public String getLastLog() {
+        List<String> logs = getAllLogs();
+        if (!logs.isEmpty()){
+            return logs.get(logs.size() - 1);
+        }
+        return null;
+    }
+
+    @Override
+    public void select(String id) throws NoSuchFieldException {
+        Shape shape = read(id);
+        if(shape == null)
+            throw new NoSuchFieldException("Shape with id " + id + " doesn't exists");
+        if(!shape.isSelected()){
+            shape.setSelected(true);
+            logRepository.addLog(Converter.ShapeToString(shape)  + " - Selected");
+        }
+    }
+
+    @Override
+    public void deselect(String id) throws NoSuchFieldException {
+        Shape shape = read(id);
+        if(shape == null)
+            throw new NoSuchFieldException("Shape with id " + id + " doesn't exists");
+        if(shape.isSelected()){
+            shape.setSelected(false);
+            logRepository.addLog(Converter.ShapeToString(shape)  + " - Deselected");
+        }
+    }
+
+    @Override
+    public Collection<Shape> getSelected() {
+        ArrayList<Shape> selectedShapes = new ArrayList<>();
+        for(Shape s: getAll()){
+            if(s.isSelected())
+                selectedShapes.add(s);
+        }
+        return selectedShapes;
     }
 }

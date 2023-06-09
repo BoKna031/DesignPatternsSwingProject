@@ -2,32 +2,29 @@ package geometry;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.geom.Area;
-
 
 public class Donut extends Circle {
 
 	private int innerRadius;
-	private Area area;
 
-	public Donut() {
-
-	}
-
-	public Donut(Point center, int innerRadius, int radius) throws Exception {
-		super(center, radius);
+	public Donut(Point center, int innerRadius, int outerRadius){
+		super(center, outerRadius);
 		this.innerRadius = innerRadius;
 	}
 	
-	public Donut(Point center, int innerRadius, int radius, Color innerColor, Color outerColor) throws Exception {
-		this(center, innerRadius, radius);
-		super.setInnerColor(innerColor);
-		super.setOuterColor(outerColor);
+	public Donut(Point center, int innerRadius, int outerRadius, Color innerColor, Color outerColor) {
+		super(center, outerRadius, innerColor, outerColor);
+		this.innerRadius = innerRadius;
+	}
+
+	public Donut(String id, Point center, int innerRadius, int radius, Color innerColor, Color outerColor){
+		this(center, innerRadius, radius, innerColor, outerColor);
+		setId(id);
 	}
 
 	public void draw(Graphics g) {
 				
-		Color color = new Color (255.0f / 255.0f, 255.0f / 255.0f, 221.0f / 255.0f, 0.0f); 
+		Color color = new Color (1.0f, 1.0f, 1.0f, 0.0f);
 		g.setColor(color);
 		g.fillOval(this.getCenter().getX() - this.getInnerRadius(), this.getCenter().getY() - this.getInnerRadius(),
 				this.getInnerRadius() * 2, this.getInnerRadius() * 2);
@@ -74,57 +71,23 @@ public class Donut extends Circle {
 		 
 	}
 
-	public int compareTo(Object o) {
-		if (o instanceof Donut) {
-			return (int) (this.area() - ((Donut) o).area());
-		}
-		return 0;
-	}
-
 	public boolean contains(int x, int y) {
 		double dFromCenter = this.getCenter().distance(x, y);
 		return super.contains(x, y) && dFromCenter > innerRadius;
 	}
 
 	public boolean contains(Point p) {
-		double dFromCenter = this.getCenter().distance(p.getX(), p.getY());
-		return super.contains(p.getX(), p.getY()) && dFromCenter > innerRadius;
-	}
-
-	public double area() {
-		return super.area() - innerRadius * innerRadius * Math.PI;
-	}
-
-	public boolean equals(Object obj) {
-		if (obj instanceof Donut) {
-			Donut d = (Donut) obj;
-			if (this.getCenter().equals(d.getCenter()) && this.getRadius() == d.getRadius()
-					&& innerRadius == d.getInnerRadius()) {
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			return false;
-		}
+		return contains(p.getX(),p.getY());
 	}
 
 	public int getInnerRadius() {
 		return innerRadius;
 	}
 
-	public void setInnerRadius(int innerRadius) throws Exception {
-		if (innerRadius <= 0) {
-			throw new NumberFormatException("Inner radius has to be a value greater than 0");
-		} else if (innerRadius >= super.getRadius()) {
-			throw new NumberFormatException("Radius has to be a value greater than inner radius");
-		} else {
-			this.innerRadius = innerRadius;
-		}
+	@Override
+	public ShapeType getShapeType() {
+		return ShapeType.DONUT;
 	}
 
-	public String toString() {
-		return super.toString() + ",innerRadius," + innerRadius;
-	}
 
 }
