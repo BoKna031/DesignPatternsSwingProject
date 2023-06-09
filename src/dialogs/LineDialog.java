@@ -33,19 +33,19 @@ public class LineDialog extends TemplateDialog implements ActionListener, KeyLis
 	}
 
 	private void createComponents(Line line) {
-		textFieldX = new JTextField(Integer.toString(line.getStartPoint().getX()));
+		textFieldX = new JTextField(Integer.toString(line.getStart().getX()));
 		textFieldX.setEditable(editable);
 		textFieldX.addKeyListener(this);
 
-		textFieldY = new JTextField(Integer.toString(line.getStartPoint().getY()));
+		textFieldY = new JTextField(Integer.toString(line.getStart().getY()));
 		textFieldY.setEditable(editable);
 		textFieldY.addKeyListener(this);
 
-		textFieldX2 = new JTextField(Integer.toString(line.getEndPoint().getX()));
+		textFieldX2 = new JTextField(Integer.toString(line.getEnd().getX()));
 		textFieldX2.setEditable(editable);
 		textFieldX2.addKeyListener(this);
 
-		textFieldY2 = new JTextField(Integer.toString(line.getEndPoint().getY()));
+		textFieldY2 = new JTextField(Integer.toString(line.getEnd().getY()));
 		textFieldY2.setEditable(editable);
 		textFieldY2.addKeyListener(this);
 

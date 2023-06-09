@@ -59,8 +59,8 @@ public class Converter {
     private static String LineToStr(Line line){
 
         String id = line.getId();
-        String p1_cord = CoordinatesToStr(line.getStartPoint());
-        String p2_cord = CoordinatesToStr(line.getEndPoint());
+        String p1_cord = CoordinatesToStr(line.getStart());
+        String p2_cord = CoordinatesToStr(line.getEnd());
         String color = ColorToStr(line.getColor());
 
         return id + ", Line " + p1_cord + p2_cord + ", color: " + color;
@@ -199,11 +199,11 @@ public class Converter {
     }
 
     private static ArrayList<Color> extractColors(String str) {
-        Pattern colorPattern = Pattern.compile("color:\\s*\\[(\\d+),\\s*(\\d+),\\s*(\\d+)\\]");
+        Pattern colorPattern = Pattern.compile("\\[(\\d+),\\s*(\\d+),\\s*(\\d+)\\]");
         Matcher matcher = colorPattern.matcher(str);
         ArrayList<Color> result = new ArrayList<>();
         while (matcher.find()) {
-            result.add(StrToColor(str.substring(matcher.start(), matcher.end())));
+            result.add(StrToColor(matcher.group(0)));
         }
         return result;
     }

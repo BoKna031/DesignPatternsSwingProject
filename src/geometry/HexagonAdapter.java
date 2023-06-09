@@ -7,11 +7,6 @@ import hexagon.*;
 public class HexagonAdapter extends Shape {
 	
 	Hexagon hexagon;
-	
-	public HexagonAdapter() {
-		hexagon = new Hexagon(0, 0, 0);
-	}
-	
 	public HexagonAdapter(int x, int y, int r, Color innerColor, Color outerColor) {
 		hexagon = new Hexagon(x, y, r);
 		hexagon.setAreaColor(innerColor);
@@ -20,16 +15,6 @@ public class HexagonAdapter extends Shape {
 	public HexagonAdapter(String id, int x, int y, int r, Color innerColor, Color outerColor) {
 		this(x, y, r, innerColor, outerColor);
 		setId(id);
-	}
-	
-	@Override
-	public void moveBy(int byX, int byY) {
-		
-	}
-	
-	@Override
-	public int compareTo(Object o) {
-		return 0;
 	}
 	
 	@Override
@@ -69,30 +54,12 @@ public class HexagonAdapter extends Shape {
 	public void setOuterColor(Color outerColor) {
 		hexagon.setBorderColor(outerColor);
 	}
-	
-	public void setX(int x) {
-		hexagon.setX(x);
-	}
-	
-	public void setY(int y) {
-		hexagon.setY(y);
-	}
-	
-	public void setR(int r) {
-		hexagon.setR(r);
-	}
-	
 	public void setSelected(boolean selected) {
 		hexagon.setSelected(selected);
 	}
 	
 	public boolean isSelected() {
 		return hexagon.isSelected();
-	}
-	
-	public String toString() {
-		return "x," + getX() + ",y," + getY() + ",radius," + getR() + ",outerColor," 
-				+ String.valueOf(getOuterColor().getRGB()) + ",innerColor," + String.valueOf(getInnerColor().getRGB());
 	}
 
 	@Override
@@ -106,11 +73,6 @@ public class HexagonAdapter extends Shape {
 		return ShapeType.HEXAGON;
 	}
 
-	@Override
-	public void configureClone(Shape shapeToClone) {
-		// TODO Auto-generated method stub
-		
-	}
 
 
 }

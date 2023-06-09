@@ -165,7 +165,6 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 
 				newShape.setSelected(true);
 				newShape.setId(shape.getId());
-				newShape.setNameString(newShape.getId()+ "," + shape);
 				ShapeModify shapeModify = new ShapeModify(shapeService, shape, newShape);
 				commandManager.execute(shapeModify);
 				model.getShapes().clear();
@@ -215,8 +214,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 			if (selectedObjects.size() == 1) {
 				Shape shape = selectedObjects.get(0);
 				int index = model.getShapes().indexOf(shape);
-				CmdToBack cmd = new CmdToBack(model, shape, index, shape.getName() + " - To Back");
-				commandManager.execute(cmd);
+				//CmdToBack cmd = new CmdToBack(model, shape, index, shape.getName() + " - To Back");
+				//commandManager.execute(cmd);
 				
 				frame.getBtnUndo().setEnabled(true);
 				frame.getBtnRedo().setEnabled(false);
@@ -232,8 +231,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				Shape shape = selectedObjects.get(0);
 				int index = model.getShapes().indexOf(shape);
 				
-				CmdToFront cmd = new CmdToFront(model, shape, index, shape.getName() + " - To Front");
-				commandManager.execute(cmd);
+				//CmdToFront cmd = new CmdToFront(model, shape, index, shape.getName() + " - To Front");
+				//commandManager.execute(cmd);
 				
 				frame.getBtnUndo().setEnabled(true);
 				frame.getBtnRedo().setEnabled(false);
@@ -247,8 +246,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 			if (selectedObjects.size() == 1) {
 				Shape shape = selectedObjects.get(0);
 				int index = model.getShapes().indexOf(shape);
-				CmdBringToBack cmd = new CmdBringToBack(model, shape, index, shape.getName() + " - Bring Back");
-				commandManager.execute(cmd);
+				//CmdBringToBack cmd = new CmdBringToBack(model, shape, index, shape.getName() + " - Bring Back");
+				//commandManager.execute(cmd);
 				
 				frame.getBtnUndo().setEnabled(true);
 				frame.getBtnRedo().setEnabled(false);
@@ -263,8 +262,8 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				Shape shape = selectedObjects.get(0);
 				int index = model.getShapes().indexOf(shape);
 				int length = model.getShapes().size();
-				CmdBringToFront cmd = new CmdBringToFront(model, shape, index, length, shape.getName() + " - Bring Front");
-				commandManager.execute(cmd);
+				//CmdBringToFront cmd = new CmdBringToFront(model, shape, index, length, shape.getName() + " - Bring Front");
+				//commandManager.execute(cmd);
 				
 				frame.getBtnUndo().setEnabled(true);
 				frame.getBtnRedo().setEnabled(false);
