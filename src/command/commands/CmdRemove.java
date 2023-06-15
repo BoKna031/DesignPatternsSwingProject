@@ -10,7 +10,6 @@ public class CmdRemove implements Command {
 
 	private IShapeService service;
 	private Shape shape;
-	private String nameString;
 	
 	
 	public CmdRemove(IShapeService service, Shape shape) {
@@ -21,18 +20,12 @@ public class CmdRemove implements Command {
 	@Override
 	public void execute() {
 		service.delete(shape.getId());
-		nameString = service.getLastLog();
 	}
 	
 	@Override
 	public void unexecute() {
 		service.create(shape);
-		nameString = service.getLastLog();
 	}
-	
-	@Override
-	public String getName() {
-		return nameString;
-	}
+
 
 }

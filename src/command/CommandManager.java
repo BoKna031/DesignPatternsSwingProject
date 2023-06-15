@@ -1,7 +1,5 @@
 package command;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Stack;
 import mvc.DrawingFrame;
 
@@ -11,9 +9,7 @@ public class CommandManager {
 	private Stack<Command> stackNormal;
 	private Stack<Command> stackReverse;
 	private DrawingFrame frame;
-	
-	private List<String> commandHistory;
-	
+
 	public static CommandManager getInstance() {
 		if(instance == null)
 			instance = new CommandManager();
@@ -23,29 +19,21 @@ public class CommandManager {
 	private CommandManager() {
 		stackNormal = new Stack<>();
 		stackReverse = new Stack<>();
-		commandHistory = new ArrayList<>();
 		
 	}
 	
 	public void execute(Command command) {
 		command.execute();
 		stackNormal.push(command);
-		commandHistory.add(command.getName());
 		stackReverse.clear();
-		
-		//logging
-		frame.appendLog(command.getName());
 	}
 	
 	public void undo() {
 		if (!stackNormal.isEmpty()) {
 			Command command = stackNormal.pop();
 			stackReverse.push(command);
-			commandHistory.add(command.getName() + " - Undo");
 			command.unexecute();
-			
-		//logging
-		frame.appendLog(command.getName() + " - Undo");
+
 			
 		}
 	}
@@ -54,11 +42,7 @@ public class CommandManager {
 		if(!stackReverse.isEmpty()) {
 			Command command = stackReverse.pop();
 			stackNormal.push(command);
-			commandHistory.add(command.getName() + " - Redo");
 			command.execute();
-			
-			//logging
-			frame.appendLog(command.getName()+ " - Redo");
 		}
 	}
 	

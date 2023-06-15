@@ -2,44 +2,31 @@ package command.commands;
 
 import command.Command;
 import geometry.Shape;
+import model.service.IShapeService;
 import mvc.DrawingModel;
 
 public class CmdBringToFront implements Command {
 
-	Shape shape;
-	DrawingModel model;
-	int index;
-	int length;
-	int indexSave;
-	String nameString;
+	private final String shapeId;
+	private final IShapeService service;
 
-	public CmdBringToFront(DrawingModel model, Shape shape, int index, int length, String nameString) {
-		this.model = model;
-		this.shape = shape;
-		this.index = index;
-		this.length = length;
-		this.nameString = nameString;
+	private int oldIndex;
+
+	public CmdBringToFront(IShapeService service, String shapeId) {
+		this.service = service;
+		this.shapeId = shapeId;
 	}
 
 	@Override
 	public void execute() {
-		indexSave = model.getShapes().indexOf(shape);
-		if (index < length) {
-			model.getShapes().remove(shape);
-			model.getShapes().add(shape);
-		}
+		oldIndex = service.bringFront(shapeId);
 	}
 
 	@Override
 	public void unexecute() {
-		model.getShapes().remove(shape);
-		model.getShapes().add(indexSave, shape);
+		service.placeTo(shapeId, oldIndex);
 	}
 
-	@Override
-	public String getName() {
-		return nameString;
-	}
 
 }
 

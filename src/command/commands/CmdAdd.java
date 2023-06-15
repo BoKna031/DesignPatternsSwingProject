@@ -8,7 +8,6 @@ public class CmdAdd implements Command {
 	
 	private final IShapeService service;
 	private final Shape shape;
-	private String nameString;
 	
 	public CmdAdd(IShapeService service, Shape shape) {
 		this.service = service;
@@ -18,18 +17,12 @@ public class CmdAdd implements Command {
 	@Override
 	public void execute() {
 		service.create(shape);
-		nameString = service.getLastLog();
 	}
 	
 	@Override
 	public void unexecute() {
 		service.delete(shape.getId());
-		nameString = service.getLastLog();
 	}
-	
-	@Override
-	public String getName() {
-		return nameString;
-	}
+
 
 }

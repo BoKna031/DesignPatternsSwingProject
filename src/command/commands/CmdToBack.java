@@ -1,42 +1,27 @@
 package command.commands;
 
 import command.Command;
-import geometry.Shape;
-import mvc.DrawingModel;
+import model.service.IShapeService;
 
 public class CmdToBack implements Command {
 	
-	Shape shape;
-	DrawingModel model;
-	int index;
-	String nameString;
+	private final String shapeId;
+	private final IShapeService service;
 	
-	public CmdToBack(DrawingModel model, Shape shape, int index, String nameString) {
-		this.model = model;
-		this.shape = shape;
-		this.index = index;
-		this.nameString = nameString;
+	public CmdToBack(IShapeService service, String shapeId) {
+		this.service = service;
+		this.shapeId = shapeId;
 	}
 	
 	@Override
 	public void execute() {
-		index--;
-		if(index >= 0) {
-			model.getShapes().remove(shape);
-			model.getShapes().add(index, shape);
-		}
+		service.toBack(shapeId);
 	}
 	
 	@Override
 	public void unexecute() {
-		index++;
-		model.getShapes().remove(shape);
-		model.getShapes().add(index, shape);
+		service.toFront(shapeId);
 	}
-	
-	@Override
-	public String getName() {
-		return nameString;
-	}
+
 
 }
