@@ -58,8 +58,10 @@ public class ShapeService implements IShapeService{
     @Override
     public Shape delete(String id) {
         Shape deletedShape = shapeRepository.delete(id);
-        if(deletedShape != null)
-            logRepository.addLog(Converter.ShapeToString(deletedShape)+ " - Deleted");
+        if(deletedShape != null) {
+            logRepository.addLog(Converter.ShapeToString(deletedShape) + " - Deleted");
+            layerRepository.delete(id);
+        }
         return deletedShape;
     }
 

@@ -17,7 +17,7 @@ public class ShapeRepository implements IShapeRepository{
 
     @Override
     public Shape create(Shape entity) {
-        String id = generateId(entity);
+        String id = entity.getId() == null? generateId(entity) : entity.getId();
         if (id == null) return null;
         entity.setId(id);
         shapes.put(id, entity);
