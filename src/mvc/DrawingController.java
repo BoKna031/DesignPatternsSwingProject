@@ -524,7 +524,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 			Shape oldShape = Converter.StringToShape(shapeDescriptions[0]);
 			shape = Converter.StringToShape(shapeDescriptions[1]);
 
-			ShapeModify shapeModify = new ShapeModify(shapeService, oldShape, shape);
+			ShapeModify shapeModify = new ShapeModify(shapeService, shapeService.read(oldShape.getId()), shape);
 			commandManager.execute(shapeModify);
 			model.getShapes().clear();
 			model.getShapes().addAll(shapeService.getAll());
