@@ -16,10 +16,13 @@ public class ShapeService implements IShapeService{
     ILogRepository logRepository;
     IShapeRepository shapeRepository;
 
+    ILayerRepository layerRepository;
+
     public ShapeService(){
         logRepository = new LogRepository();
         shapeRepository = new ShapeRepository();
         fileManager = new FileManager(shapeRepository,logRepository);
+        layerRepository = new LayerRepository();
     }
     public ShapeService(IShapeRepository shapeRepository, ILogRepository logRepository){
         fileManager = new FileManager(shapeRepository, logRepository);
@@ -29,8 +32,10 @@ public class ShapeService implements IShapeService{
     @Override
     public Shape create(Shape entity) {
         Shape createdShape = shapeRepository.create(entity);
-        if(createdShape != null)
-            logRepository.addLog( Converter.ShapeToString(entity) + " - Add");
+        if(createdShape != null) {
+            logRepository.addLog(Converter.ShapeToString(entity) + " - Add");
+            layerRepository.add(createdShape.getId());
+        }
         return createdShape;
     }
 
@@ -41,9 +46,11 @@ public class ShapeService implements IShapeService{
 
     @Override
     public Shape update(Shape entity) {
-        if(shapeRepository.read(entity.getId()) == null)
+        Shape oldShape = shapeRepository.read(entity.getId());
+        if(oldShape == null)
             return null;
-        Shape oldShape = shapeRepository.update(entity);
+        entity.setSelected(oldShape.isSelected());
+        shapeRepository.update(entity);
         logRepository.addLog(Converter.ShapeToString(oldShape) + ",Modify to " + Converter.ShapeToString(entity));
         return entity;
     }
@@ -51,14 +58,19 @@ public class ShapeService implements IShapeService{
     @Override
     public Shape delete(String id) {
         Shape deletedShape = shapeRepository.delete(id);
-        if(deletedShape != null)
-            logRepository.addLog(Converter.ShapeToString(deletedShape)+ " - Deleted");
+        if(deletedShape != null) {
+            logRepository.addLog(Converter.ShapeToString(deletedShape) + " - Deleted");
+            layerRepository.delete(id);
+        }
         return deletedShape;
     }
 
     @Override
     public void readFromFile(File file) throws ClassNotFoundException, IOException{
         fileManager.readFromFile(file);
+        for(Shape sh: shapeRepository.getAll()){
+            layerRepository.add(sh.getId());
+        }
     }
 
     @Override
@@ -68,9 +80,13 @@ public class ShapeService implements IShapeService{
 
     @Override
     public Collection<Shape> getAll() {
-        return shapeRepository.getAll();
+        Collection<Shape> result = new ArrayList<>();
+        for(String id: layerRepository.getAll()){
+            result.add(read(id));
+        }
+        return result;
     }
-
+    
     @Override
     public List<String> getAllLogs() {
         return logRepository.getAllLogs();
@@ -115,5 +131,38 @@ public class ShapeService implements IShapeService{
                 selectedShapes.add(s);
         }
         return selectedShapes;
+    }
+
+    @Override
+    public int toFront(String shapeId) {
+        int result = layerRepository.toFront(shapeId);
+        logRepository.addLog(Converter.ShapeToString(read(shapeId))  + " - To Front");
+        return result;
+    }
+
+    @Override
+    public int toBack(String shapeId) {
+        int result = layerRepository.toBack(shapeId);
+        logRepository.addLog(Converter.ShapeToString(read(shapeId))  + " - To Back");
+        return  result;
+    }
+
+    @Override
+    public int bringBack(String shapeId) {
+        int result = layerRepository.bringBack(shapeId);
+        logRepository.addLog(Converter.ShapeToString(read(shapeId))  + " - Bring Back");
+        return result;
+    }
+
+    @Override
+    public int bringFront(String shapeId) {
+        int result = layerRepository.bringFront(shapeId);
+        logRepository.addLog(Converter.ShapeToString(read(shapeId))  + " - Bring Front");
+        return result;
+    }
+
+    @Override
+    public void placeTo(String shapeId, int index) {
+        layerRepository.placeTo(shapeId, index);
     }
 }

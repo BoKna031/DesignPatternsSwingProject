@@ -17,26 +17,46 @@ public class ShapeRepository implements IShapeRepository{
 
     @Override
     public Shape create(Shape entity) {
-        String id = generateId(entity);
+        String id;
+        if(entity.getId() == null) {
+            id = generateId(entity);
+        }
+        else{
+            id = entity.getId();
+            updateCounter(entity);
+        }
         if (id == null) return null;
         entity.setId(id);
         shapes.put(id, entity);
         return entity;
     }
 
+    private void updateCounter(Shape entity) {
+        String idCnt = entity.getId().replaceAll("[^0-9]", "");
+        int cnt = Integer.parseInt(idCnt);
+        switch (entity.getShapeType()){
+            case POINT :    pointerCnt = cnt + 1;   break;
+            case LINE:      lineCnt = cnt + 1;      break;
+            case RECTANGLE: rectangleCnt = cnt + 1; break;
+            case DONUT:     donutCnt = cnt + 1;     break;
+            case CIRCLE:    circleCnt = cnt + 1;    break;
+            case HEXAGON:   hexagonCnt = cnt + 1;   break;
+        }
+    }
+
     private String generateId(Shape entity) {
         String id;
-        if(entity instanceof Point){
+        if(entity.getShapeType() == ShapeType.POINT){
             id = "Point" + pointerCnt++;
-        }else if(entity instanceof Line){
+        }else if(entity.getShapeType() == ShapeType.LINE){
             id = "Line" + lineCnt++;
-        }else if(entity instanceof Rectangle){
+        }else if(entity.getShapeType() == ShapeType.RECTANGLE){
             id = "Rectangle" + rectangleCnt++;
-        }else if (entity instanceof Donut) {
+        }else if (entity.getShapeType() == ShapeType.DONUT) {
             id = "Donut" + donutCnt++;
-        }else if(entity instanceof Circle){
+        }else if(entity.getShapeType() == ShapeType.CIRCLE){
             id = "Circle" + circleCnt++;
-        }  else if (entity instanceof HexagonAdapter) {
+        }  else if (entity.getShapeType() == ShapeType.HEXAGON) {
             id = "Hexagon" + hexagonCnt++;
         } else {
             return null;

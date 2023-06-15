@@ -9,7 +9,6 @@ public class ShapeModify implements Command {
 	private final Shape oldState;
 	private final Shape newState;
 	private final IShapeService service;
-	private String log;
 
 	public ShapeModify(IShapeService service, Shape oldState, Shape newState) {
 		this.oldState = oldState;
@@ -22,7 +21,6 @@ public class ShapeModify implements Command {
 
 		try {
 			service.update(newState);
-			log = service.getLastLog();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -37,11 +35,6 @@ public class ShapeModify implements Command {
 			e.printStackTrace();
 		}
 
-	}
-
-	@Override
-	public String getName() {
-		return log;
 	}
 
 }

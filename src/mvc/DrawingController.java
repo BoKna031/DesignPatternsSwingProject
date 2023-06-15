@@ -56,7 +56,6 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		commandManager.setFrame(frame);
 		observerUpdate = new ObserverUpdate(frame);
 		observer.addPropertyChangeListener(observerUpdate);
-		
 	}
 
 
@@ -125,9 +124,6 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 			if (input == JOptionPane.YES_OPTION) {
 				preformDelete();
 				notifyAllObservers(selectedObjects.size());
-				model.getShapes().clear();
-				model.getShapes().addAll(shapeService.getAll());
-				frame.getView().repaint();
 			}
 		}
 		
@@ -167,13 +163,9 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 				newShape.setId(shape.getId());
 				ShapeModify shapeModify = new ShapeModify(shapeService, shape, newShape);
 				commandManager.execute(shapeModify);
-				model.getShapes().clear();
-				model.getShapes().addAll(shapeService.getAll());
 
 				frame.getBtnUndo().setEnabled(true);
 				frame.getBtnRedo().setEnabled(false);
-
-				frame.getView().repaint();
 			} else {
 				JOptionPane.showMessageDialog(null, "Izaberite 1 objekat!");
 			}
@@ -188,9 +180,6 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 			else
 				frame.getBtnUndo().setEnabled(true);
 			notifyAllObservers(selectedObjects.size());
-			model.getShapes().clear();
-			model.getShapes().addAll(shapeService.getAll());
-			frame.getView().repaint();
 		}
 		
 		
@@ -203,73 +192,67 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 			else
 				frame.getBtnRedo().setEnabled(true);
 			notifyAllObservers(selectedObjects.size());
-			model.getShapes().clear();
-			model.getShapes().addAll(shapeService.getAll());
-			frame.getView().repaint();
 		}
 		
 		
 		//ToBack
 		else if (e.getSource() == frame.getBtnToBack()) {
-			if (selectedObjects.size() == 1) {
-				Shape shape = selectedObjects.get(0);
-				int index = model.getShapes().indexOf(shape);
-				//CmdToBack cmd = new CmdToBack(model, shape, index, shape.getName() + " - To Back");
-				//commandManager.execute(cmd);
+			if (shapeService.getSelected().size() == 1) {
+				ArrayList<Shape> selectedShapes = (ArrayList<Shape>)shapeService.getSelected();
+				Shape shape = selectedShapes.get(0);
+				CmdToBack cmd = new CmdToBack(shapeService, shape.getId());
+				commandManager.execute(cmd);
 				
 				frame.getBtnUndo().setEnabled(true);
 				frame.getBtnRedo().setEnabled(false);
-				frame.getView().repaint();
 			}
 		}
 		
 		
 		//ToFront
 		else if (e.getSource() == frame.getBtnToFront()) {
-			if (selectedObjects.size() == 1) {
-				
-				Shape shape = selectedObjects.get(0);
-				int index = model.getShapes().indexOf(shape);
-				
-				//CmdToFront cmd = new CmdToFront(model, shape, index, shape.getName() + " - To Front");
-				//commandManager.execute(cmd);
-				
+			if (shapeService.getSelected().size() == 1) {
+				ArrayList<Shape> selectedShapes = (ArrayList<Shape>)shapeService.getSelected();
+				Shape shape = selectedShapes.get(0);
+				CmdToFront cmd = new CmdToFront(shapeService, shape.getId());
+				commandManager.execute(cmd);
+
 				frame.getBtnUndo().setEnabled(true);
 				frame.getBtnRedo().setEnabled(false);
-				frame.getView().repaint();
 			}
 		}
 		
 		
 		//BringBack
 		else if (e.getSource() == frame.getBtnBringBack()) {
-			if (selectedObjects.size() == 1) {
-				Shape shape = selectedObjects.get(0);
-				int index = model.getShapes().indexOf(shape);
-				//CmdBringToBack cmd = new CmdBringToBack(model, shape, index, shape.getName() + " - Bring Back");
-				//commandManager.execute(cmd);
-				
+			if (shapeService.getSelected().size() == 1) {
+				ArrayList<Shape> selectedShapes = (ArrayList<Shape>)shapeService.getSelected();
+				Shape shape = selectedShapes.get(0);
+				CmdBringToBack cmd = new CmdBringToBack(shapeService, shape.getId());
+				commandManager.execute(cmd);
+
 				frame.getBtnUndo().setEnabled(true);
 				frame.getBtnRedo().setEnabled(false);
-				frame.getView().repaint();
 			}
 		}
 		
 		
 		//BringFront
 		else if (e.getSource() == frame.getBtnBringFront()) {
-			if (selectedObjects.size() == 1) {
-				Shape shape = selectedObjects.get(0);
-				int index = model.getShapes().indexOf(shape);
-				int length = model.getShapes().size();
-				//CmdBringToFront cmd = new CmdBringToFront(model, shape, index, length, shape.getName() + " - Bring Front");
-				//commandManager.execute(cmd);
-				
+			if (shapeService.getSelected().size() == 1) {
+				ArrayList<Shape> selectedShapes = (ArrayList<Shape>)shapeService.getSelected();
+				Shape shape = selectedShapes.get(0);
+				CmdBringToFront cmd = new CmdBringToFront(shapeService, shape.getId());
+				commandManager.execute(cmd);
+
 				frame.getBtnUndo().setEnabled(true);
 				frame.getBtnRedo().setEnabled(false);
-				frame.getView().repaint();
+
 			}
 		}
+		model.getShapes().clear();
+		model.getShapes().addAll(shapeService.getAll());
+		frame.getView().repaint();
 		
 	}
 	
@@ -461,54 +444,30 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 			commandManager.redo();
 			notifyAllObservers(selectedObjects.size());
 		} else if (line.contains("To Front")) {
-			/*
-			shape = selectedObjects.get(0);
-			int index = model.getShapes().indexOf(shape);
-			
-			CmdToFront cmd = new CmdToFront(model, shape, index, shape.getName() + " - To Front");
+			shape = Converter.StringToShape(line);
+			CmdToFront cmd = new CmdToFront(shapeService,shape.getId());
 			commandManager.execute(cmd);
-			
 			frame.getBtnUndo().setEnabled(true);
 			frame.getBtnRedo().setEnabled(false);
-			frame.getView().repaint();
-
-			 */
 			
 		} else if (line.contains("To Back")) {
-			/*
-			shape = selectedObjects.get(0);
-			int index = model.getShapes().indexOf(shape);
-			CmdToBack cmd = new CmdToBack(model, shape, index, shape.getName() + " - To Back");
+			shape = Converter.StringToShape(line);
+			CmdToBack cmd = new CmdToBack(shapeService,shape.getId());
 			commandManager.execute(cmd);
-			
 			frame.getBtnUndo().setEnabled(true);
 			frame.getBtnRedo().setEnabled(false);
-			frame.getView().repaint();
-			*/
 		} else if (line.contains("Bring Front")) {
-			/*
-			shape = selectedObjects.get(0);
-			int index = model.getShapes().indexOf(shape);
-			int length = model.getShapes().size();
-			CmdBringToFront cmd = new CmdBringToFront(model, shape, index, length, shape.getName() + " - Bring Front");
+			shape = Converter.StringToShape(line);
+			CmdBringToFront cmd = new CmdBringToFront(shapeService,shape.getId());
 			commandManager.execute(cmd);
-			
 			frame.getBtnUndo().setEnabled(true);
 			frame.getBtnRedo().setEnabled(false);
-			frame.getView().repaint();
-			*/
 		} else if (line.contains("Bring Back")) {
-			/*
-			shape = selectedObjects.get(0);
-			int index = model.getShapes().indexOf(shape);
-			CmdBringToBack cmd = new CmdBringToBack(model, shape, index, shape.getName() + " - Bring Back");
+			shape = Converter.StringToShape(line);
+			CmdBringToBack cmd = new CmdBringToBack(shapeService,shape.getId());
 			commandManager.execute(cmd);
-			
 			frame.getBtnUndo().setEnabled(true);
 			frame.getBtnRedo().setEnabled(false);
-			frame.getView().repaint();
-
-			 */
 		} else if (line.contains("Add")) {
 			line = line.replaceAll(" - Add", "");
 			shape = Converter.StringToShape(line);
@@ -524,7 +483,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 			Shape oldShape = Converter.StringToShape(shapeDescriptions[0]);
 			shape = Converter.StringToShape(shapeDescriptions[1]);
 
-			ShapeModify shapeModify = new ShapeModify(shapeService, oldShape, shape);
+			ShapeModify shapeModify = new ShapeModify(shapeService, shapeService.read(oldShape.getId()), shape);
 			commandManager.execute(shapeModify);
 			model.getShapes().clear();
 			model.getShapes().addAll(shapeService.getAll());
@@ -560,6 +519,9 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		if (i == temporarilyLogs.size() || temporarilyLogs.get(i) == null) {
 			frame.getBtnNext().setEnabled(false);
 		}
+
+		model.getShapes().clear();
+		model.getShapes().addAll(shapeService.getAll());
 		frame.repaint();
 	}
 
@@ -584,7 +546,9 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		}
 	}
 	private boolean changeStatusOfSelectedObject(int x, int y) {
-		for (Shape shape : shapeService.getAll()) {
+		ArrayList<Shape> shapes = (ArrayList<Shape>) shapeService.getAll();
+		for (int i = shapes.size() - 1; i >= 0; i--) {
+			Shape shape = shapes.get(i);
 			if(!shape.contains(x, y)) {
 				continue;
 			}

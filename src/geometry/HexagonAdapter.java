@@ -73,6 +73,4 @@ public class HexagonAdapter extends Shape {
 		return ShapeType.HEXAGON;
 	}
 
-
-
 }

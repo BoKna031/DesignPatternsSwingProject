@@ -1,44 +1,28 @@
 package command.commands;
 
 import command.Command;
-import geometry.Shape;
-import mvc.DrawingModel;
+import model.service.IShapeService;
 
 public class CmdBringToBack  implements Command {
 	
-	Shape shape;
-	DrawingModel model;
-	int index;
-	int indexSave;
-	String nameString;
-	
-	
-	
-	public CmdBringToBack(DrawingModel model, Shape shape, int index, String nameString) {
-		this.model = model;
-		this.shape = shape;
-		this.index = index;
-		this.nameString = nameString;
+	private final String shapeId;
+	private final IShapeService service;
+	private int oldIndex;
+
+	public CmdBringToBack(IShapeService service, String shapeId) {
+		this.service = service;
+		this.shapeId = shapeId;
 	}
 	
 	@Override
 	public void execute() {
-		indexSave = model.getShapes().indexOf(shape);
-		if(index != 0) {
-			model.getShapes().remove(shape);
-			model.getShapes().add(0, shape);
-		}
+		oldIndex = service.bringBack(shapeId);
 	}
 	
 	@Override
 	public void unexecute() {
-		model.getShapes().remove(shape);
-		model.getShapes().add(indexSave, shape);
+		service.placeTo(shapeId, oldIndex);
 	}
-	
-	@Override
-	public String getName() {
-		return nameString;
-	}
+
 
 }
