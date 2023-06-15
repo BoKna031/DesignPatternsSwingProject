@@ -5,13 +5,13 @@ import java.util.Collection;
 public interface ILayerRepository {
 
     boolean add(String shapeId);
-    boolean add(String shapeId, int index);
+    boolean placeTo(String shapeId, int index);
     Collection<String> getAll();
     int IndexOf(String shapeId);
     boolean delete(String shapeId);
-    void toFront(String shapeId);
-    void toBack(String shapeId);
-    void bringBack(String shapeId);
-    void bringFront(String shapeId);
+    int toFront(String shapeId);
+    int toBack(String shapeId);
+    int bringBack(String shapeId);
+    int bringFront(String shapeId);
 
 }

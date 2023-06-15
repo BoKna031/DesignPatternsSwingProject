@@ -24,9 +24,8 @@ public class LayerRepository implements ILayerRepository {
     }
 
     @Override
-    public boolean add(String shapeId, int index) {
-        if(IndexOf(shapeId) != -1)
-            return false;
+    public boolean placeTo(String shapeId, int index) {
+        orderOfShapes.remove(shapeId);
         orderOfShapes.add(index, shapeId);
         return true;
     }
@@ -47,34 +46,42 @@ public class LayerRepository implements ILayerRepository {
     }
 
     @Override
-    public void toFront(String shapeId) {
+    public int toFront(String shapeId) {
         int index = IndexOf(shapeId);
-        if(index == -1 || index == orderOfShapes.size() - 1)
-            return;
-        orderOfShapes.remove(shapeId);
-        orderOfShapes.add(++index, shapeId);
+        if(index != -1 && index < orderOfShapes.size() - 1) {
+            orderOfShapes.remove(shapeId);
+            orderOfShapes.add(index + 1, shapeId);
+        }
+        return index;
     }
 
     @Override
-    public void toBack(String shapeId) {
+    public int toBack(String shapeId) {
         int index = IndexOf(shapeId);
-        if(index <= 0)
-            return;
-        orderOfShapes.remove(shapeId);
-        orderOfShapes.add(--index, shapeId);
+        if(index > 0) {
+            orderOfShapes.remove(shapeId);
+            orderOfShapes.add(index - 1, shapeId);
+        }
+        return index;
     }
 
     @Override
-    public void bringBack(String shapeId) {
-        boolean exists = orderOfShapes.remove(shapeId);
-        if(exists)
+    public int bringBack(String shapeId) {
+        int result = IndexOf(shapeId);
+        if(result != -1) {
+            orderOfShapes.remove(shapeId);
             orderOfShapes.add(0, shapeId);
+        }
+        return result;
     }
 
     @Override
-    public void bringFront(String shapeId) {
-        boolean exists = orderOfShapes.remove(shapeId);
-        if(exists)
+    public int bringFront(String shapeId) {
+        int result = IndexOf(shapeId);
+        if(result != -1) {
+            orderOfShapes.remove(shapeId);
             orderOfShapes.add(shapeId);
+        }
+        return result;
     }
 }

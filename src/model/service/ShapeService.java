@@ -132,4 +132,37 @@ public class ShapeService implements IShapeService{
         }
         return selectedShapes;
     }
+
+    @Override
+    public int toFront(String shapeId) {
+        int result = layerRepository.toFront(shapeId);
+        logRepository.addLog(Converter.ShapeToString(read(shapeId))  + " - To Front");
+        return result;
+    }
+
+    @Override
+    public int toBack(String shapeId) {
+        int result = layerRepository.toBack(shapeId);
+        logRepository.addLog(Converter.ShapeToString(read(shapeId))  + " - To Back");
+        return  result;
+    }
+
+    @Override
+    public int bringBack(String shapeId) {
+        int result = layerRepository.bringBack(shapeId);
+        logRepository.addLog(Converter.ShapeToString(read(shapeId))  + " - Bring Back");
+        return result;
+    }
+
+    @Override
+    public int bringFront(String shapeId) {
+        int result = layerRepository.bringFront(shapeId);
+        logRepository.addLog(Converter.ShapeToString(read(shapeId))  + " - Bring Front");
+        return result;
+    }
+
+    @Override
+    public void placeTo(String shapeId, int index) {
+        layerRepository.placeTo(shapeId, index);
+    }
 }

@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
-public interface IShapeService extends CRUD<String, Shape> {
+public interface IShapeService extends CRUD<String, Shape>, ILayerService {
     void readFromFile(File file) throws ClassNotFoundException, IOException;
     void saveToFile(File file) throws IOException;
 
