@@ -1,7 +1,6 @@
 package geometry;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import hexagon.*;
 
 public class HexagonAdapter extends Shape {
@@ -21,11 +20,7 @@ public class HexagonAdapter extends Shape {
 	public boolean contains(int x, int y) {
 		return hexagon.doesContain(x, y);
 	}
-	
-	@Override
-	public void draw(Graphics g) {
-		hexagon.paint(g);
-	}
+
 	
 	public Color getInnerColor() {
 		return hexagon.getAreaColor();
@@ -60,12 +55,6 @@ public class HexagonAdapter extends Shape {
 	
 	public boolean isSelected() {
 		return hexagon.isSelected();
-	}
-
-	@Override
-	public void drawSelection(Graphics g) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override

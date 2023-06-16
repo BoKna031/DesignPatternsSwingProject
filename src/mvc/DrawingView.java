@@ -1,13 +1,15 @@
 package mvc;
 
-import java.awt.*;
-import java.util.Iterator;
 import javax.swing.JPanel;
-import geometry.Shape;
+import view.DrawingService;
+import view.IDrawingService;
+
+import java.awt.*;
 
 public class DrawingView extends JPanel {
 	
 	private final DrawingModel model;
+	private final IDrawingService drawingService = new DrawingService();
 
 	public DrawingView(Dimension dimension, DrawingModel model) {
 		if(dimension != null)
@@ -20,9 +22,8 @@ public class DrawingView extends JPanel {
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 
-		Iterator<Shape> it = model.getShapes().iterator();
-		while(it.hasNext()) {
-			it.next().draw(g);
+		for(geometry.Shape shape: model.getShapes()) {
+			drawingService.draw(g, shape);
 		}
 	}
 

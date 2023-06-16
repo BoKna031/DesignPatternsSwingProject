@@ -1,12 +1,11 @@
 package geometry;
 
 import java.awt.Color;
-import java.awt.Graphics;
 
 public class Point extends Shape {
 
-	private int x;
-	private int y;
+	private final int x;
+	private final int y;
 	private Color color;
 
 	public Point(int x, int y) {
@@ -26,24 +25,6 @@ public class Point extends Shape {
 	@Override
 	public boolean contains(int x, int y) {
 		return distance(x, y) < 5;
-	}
-
-	@Override
-	public void draw(Graphics g) {
-		g.setColor(color);
-		g.drawLine(this.x - 5, y, this.x + 5, y);
-		g.drawLine(x, this.y - 5, x, this.y + 5);
-		if (isSelected()) {
-			drawSelection(g);
-		}
-		
-	}
-	
-	@Override
-	public void drawSelection(Graphics g)
-	{
-		g.setColor(Color.BLUE);
-		g.drawRect(this.x - 3 , this.y - 3, 6, 6);
 	}
 
 	public double distance(Point point){
@@ -72,6 +53,4 @@ public class Point extends Shape {
 	public ShapeType getShapeType() {
 		return ShapeType.POINT;
 	}
-
-
 }
