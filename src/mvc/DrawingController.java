@@ -1,14 +1,8 @@
 package mvc;
 
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.*;
 import java.util.ArrayList;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 
 import command.CommandManager;
 import command.commands.CmdBringToBack;
@@ -20,19 +14,14 @@ import command.commands.CmdDeselect;
 import command.commands.CmdSelect;
 import command.commands.CmdToBack;
 import command.commands.CmdToFront;
-import dialogs.CircleDialog;
-import dialogs.DonutDialog;
-import dialogs.HexagonDialog;
-import dialogs.LineDialog;
-import dialogs.PointDialog;
-import dialogs.RectangleDialog;
 import geometry.*;
 import model.service.IShapeService;
 import model.service.ShapeService;
 import observer.Observer;
 import observer.ObserverUpdate;
+import view.ViewService;
 
-public class DrawingController extends MouseAdapter implements ActionListener {
+public class DrawingController {
 
 	
 	private DrawingModel model;
@@ -59,35 +48,25 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 	}
 
 
-	public void mouseClicked(MouseEvent e) {
-		
-		int x = e.getX();
-		int y = e.getY();
+	public void createShape(int x, int y) {
 		Color innerColor = frame.getInnerColor();
 		Color outerColor = frame.getOuterColor();
-
-		if(frame.getBtnSelect().isSelected()) {
-			selectBtnClicked(x,y);
-			frame.getView().repaint();
-			return;
-		}
-
 		Shape newShape;
-		Point p = new Point(x,y);
+		Point p = new Point(x,y, outerColor);
 		if (frame.getBtnPoint().isSelected()) {
-			newShape = pointDialog(new Point(x, y, outerColor), false);
+			newShape = ViewService.pointDialog(p, false);
 		} else if (frame.getBtnLine().isSelected()) {
 			newShape = lineBtnClicked(p,outerColor);
 			if(newShape == null)
 				return;
 		} else if (frame.getBtnRectangle().isSelected()) {
-			newShape = rectDialog(new Rectangle(p, 0, 0, innerColor, outerColor), false);
+			newShape = ViewService.rectDialog(new Rectangle(p, 0, 0, innerColor, outerColor), false);
 		} else if (frame.getBtnCircle().isSelected()) {
-			newShape = circleDialog(new Circle(p,0,innerColor,outerColor), false);
+			newShape = ViewService.circleDialog(new Circle(p,0,innerColor,outerColor), false);
 		} else if (frame.getBtnDonut().isSelected()) {
-			newShape = donutDialog(new Donut(p,0,0,innerColor,outerColor), false);
+			newShape = ViewService.donutDialog(new Donut(p,0,0,innerColor,outerColor), false);
 		} else if (frame.getBtnHex().isSelected()) {
-			newShape = hexDialog(new HexagonAdapter(x, y, 0, innerColor, outerColor), false);
+			newShape = ViewService.hexDialog(new HexagonAdapter(x, y, 0, innerColor, outerColor), false);
 		} else {
 			return;
 		}
@@ -98,273 +77,141 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		frame.getBtnUndo().setEnabled(true);
 		frame.getBtnRedo().setEnabled(false);
 
-		model.getShapes().clear();
-		model.getShapes().addAll(shapeService.getAll());
-
-		frame.getView().repaint();
+		updateView();
 		frame.getBtnNext().setEnabled(false);
 		
 	}
 
-	private void preformDelete(){
+	public void delete(){
 		for(Shape s: shapeService.getSelected()){
 			CmdRemove cmdRemove = new CmdRemove(shapeService, s);
 			commandManager.execute(cmdRemove);
 		}
 		frame.getBtnUndo().setEnabled(true);
 		frame.getBtnRedo().setEnabled(false);
+		notifyAllObservers(selectedObjects.size());
+		updateView();
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		
-		//DELETE
-		if (e.getSource() == frame.getBtnDelete()) {
-			int input = JOptionPane.showConfirmDialog(null, "Da li ste sigurni?");
-			if (input == JOptionPane.YES_OPTION) {
-				preformDelete();
-				notifyAllObservers(selectedObjects.size());
-			}
-		}
-		
-		//MODIFY
-		else if (e.getSource() == frame.getBtnModify()) {
-			if (shapeService.getSelected().size() == 1) {
-				ArrayList<Shape> selectedShapes = (ArrayList<Shape>)shapeService.getSelected();
-				Shape shape = selectedShapes.get(0);
-				String s = shape.getClass().getSimpleName();
-				Shape newShape;
-				switch (s) {
-					case "Point":
-						newShape = pointDialog((Point) shape, true);
-						break;
-					case "Line":
-						newShape = lineDialog((Line) shape, true);
-						break;
-					case "Rectangle":
-						newShape = rectDialog((Rectangle) shape, true);
-						break;
-					case "Circle":
-						newShape = circleDialog((Circle) shape, true);
-						break;
-					case "Donut":
-						newShape = donutDialog((Donut) shape, true);
-						break;
-					case "HexagonAdapter":
-						newShape = hexDialog((HexagonAdapter) shape, true);
-						break;
-					default:
-						newShape = null;
-				}
-				if(newShape == null)
-					return;
-
-				newShape.setSelected(true);
-				newShape.setId(shape.getId());
-				ShapeModify shapeModify = new ShapeModify(shapeService, shape, newShape);
-				commandManager.execute(shapeModify);
-
-				frame.getBtnUndo().setEnabled(true);
-				frame.getBtnRedo().setEnabled(false);
-			} else {
-				JOptionPane.showMessageDialog(null, "Izaberite 1 objekat!");
-			}
-		}
-		
-		//Undo
-		else if (e.getSource() == frame.getBtnUndo()) {
-			commandManager.undo();
-			frame.getBtnRedo().setEnabled(true);
-			if(commandManager.sizeNormal() == 0)
-				frame.getBtnUndo().setEnabled(false);
-			else
-				frame.getBtnUndo().setEnabled(true);
-			notifyAllObservers(selectedObjects.size());
-		}
-		
-		
-		//Redo
-		else if (e.getSource() == frame.getBtnRedo()) {
-			commandManager.redo();
+	public void undo(){
+		commandManager.undo();
+		frame.getBtnRedo().setEnabled(true);
+		if(commandManager.sizeNormal() == 0)
+			frame.getBtnUndo().setEnabled(false);
+		else
 			frame.getBtnUndo().setEnabled(true);
-			if (commandManager.sizeReverse() == 0)
-				frame.getBtnRedo().setEnabled(false);
-			else
-				frame.getBtnRedo().setEnabled(true);
-			notifyAllObservers(selectedObjects.size());
-		}
-		
-		
-		//ToBack
-		else if (e.getSource() == frame.getBtnToBack()) {
-			if (shapeService.getSelected().size() == 1) {
-				ArrayList<Shape> selectedShapes = (ArrayList<Shape>)shapeService.getSelected();
-				Shape shape = selectedShapes.get(0);
-				CmdToBack cmd = new CmdToBack(shapeService, shape.getId());
-				commandManager.execute(cmd);
-				
-				frame.getBtnUndo().setEnabled(true);
-				frame.getBtnRedo().setEnabled(false);
-			}
-		}
-		
-		
-		//ToFront
-		else if (e.getSource() == frame.getBtnToFront()) {
-			if (shapeService.getSelected().size() == 1) {
-				ArrayList<Shape> selectedShapes = (ArrayList<Shape>)shapeService.getSelected();
-				Shape shape = selectedShapes.get(0);
-				CmdToFront cmd = new CmdToFront(shapeService, shape.getId());
-				commandManager.execute(cmd);
+		notifyAllObservers(selectedObjects.size());
+		updateView();
+	}
 
-				frame.getBtnUndo().setEnabled(true);
-				frame.getBtnRedo().setEnabled(false);
-			}
-		}
-		
-		
-		//BringBack
-		else if (e.getSource() == frame.getBtnBringBack()) {
-			if (shapeService.getSelected().size() == 1) {
-				ArrayList<Shape> selectedShapes = (ArrayList<Shape>)shapeService.getSelected();
-				Shape shape = selectedShapes.get(0);
-				CmdBringToBack cmd = new CmdBringToBack(shapeService, shape.getId());
-				commandManager.execute(cmd);
+	public void redo(){
+		commandManager.redo();
+		frame.getBtnUndo().setEnabled(true);
+		if (commandManager.sizeReverse() == 0)
+			frame.getBtnRedo().setEnabled(false);
+		else
+			frame.getBtnRedo().setEnabled(true);
+		notifyAllObservers(selectedObjects.size());
+		updateView();
+	}
 
-				frame.getBtnUndo().setEnabled(true);
-				frame.getBtnRedo().setEnabled(false);
-			}
-		}
-		
-		
-		//BringFront
-		else if (e.getSource() == frame.getBtnBringFront()) {
-			if (shapeService.getSelected().size() == 1) {
-				ArrayList<Shape> selectedShapes = (ArrayList<Shape>)shapeService.getSelected();
-				Shape shape = selectedShapes.get(0);
-				CmdBringToFront cmd = new CmdBringToFront(shapeService, shape.getId());
-				commandManager.execute(cmd);
+	public void bringToBack(){
+		if (shapeService.getSelected().size() != 1) return;
 
-				frame.getBtnUndo().setEnabled(true);
-				frame.getBtnRedo().setEnabled(false);
+		ArrayList<Shape> selectedShapes = (ArrayList<Shape>)shapeService.getSelected();
+		Shape shape = selectedShapes.get(0);
+		CmdBringToBack cmd = new CmdBringToBack(shapeService, shape.getId());
+		commandManager.execute(cmd);
 
-			}
+		frame.getBtnUndo().setEnabled(true);
+		frame.getBtnRedo().setEnabled(false);
+		updateView();
+	}
+
+	public void bringToFront(){
+		if (shapeService.getSelected().size() != 1) return;
+
+		ArrayList<Shape> selectedShapes = (ArrayList<Shape>)shapeService.getSelected();
+		Shape shape = selectedShapes.get(0);
+		CmdBringToFront cmd = new CmdBringToFront(shapeService, shape.getId());
+		commandManager.execute(cmd);
+
+		frame.getBtnUndo().setEnabled(true);
+		frame.getBtnRedo().setEnabled(false);
+		updateView();
+	}
+
+	public void modify() throws Exception{
+		ArrayList<Shape> selectedShapes = (ArrayList<Shape>) shapeService.getSelected();
+		if(selectedShapes.size() != 1)
+			throw new Exception("Izaberite 1 objekat!");
+		Shape shape = selectedShapes.get(0);
+		Shape newShape;
+		switch (shape.getShapeType()) {
+			case POINT:
+				newShape = ViewService.pointDialog((Point) shape, true);
+				break;
+			case LINE:
+				newShape = ViewService.lineDialog((Line) shape, true);
+				break;
+			case RECTANGLE:
+				newShape = ViewService.rectDialog((Rectangle) shape, true);
+				break;
+			case CIRCLE:
+				newShape = ViewService.circleDialog((Circle) shape, true);
+				break;
+			case DONUT:
+				newShape = ViewService.donutDialog((Donut) shape, true);
+				break;
+			case HEXAGON:
+				newShape = ViewService.hexDialog((HexagonAdapter) shape, true);
+				break;
+			default:
+				throw new Exception("Not valid shape");
 		}
+		ShapeModify shapeModify = new ShapeModify(shapeService, shape, newShape);
+		commandManager.execute(shapeModify);
+
+		frame.getBtnUndo().setEnabled(true);
+		frame.getBtnRedo().setEnabled(false);
+
+		updateView();
+	}
+
+	public void toFront() {
+		if (shapeService.getSelected().size() == 1) {
+			ArrayList<Shape> selectedShapes = (ArrayList<Shape>)shapeService.getSelected();
+			Shape shape = selectedShapes.get(0);
+			CmdToFront cmd = new CmdToFront(shapeService, shape.getId());
+			commandManager.execute(cmd);
+
+			frame.getBtnUndo().setEnabled(true);
+			frame.getBtnRedo().setEnabled(false);
+
+			updateView();
+		}
+	}
+
+	public void toBack() {
+		if (shapeService.getSelected().size() == 1) {
+			ArrayList<Shape> selectedShapes = (ArrayList<Shape>)shapeService.getSelected();
+			Shape shape = selectedShapes.get(0);
+			CmdToBack cmd = new CmdToBack(shapeService, shape.getId());
+			commandManager.execute(cmd);
+
+			frame.getBtnUndo().setEnabled(true);
+			frame.getBtnRedo().setEnabled(false);
+			updateView();
+		}
+	}
+
+	private void updateView(){
 		model.getShapes().clear();
 		model.getShapes().addAll(shapeService.getAll());
 		frame.getView().repaint();
-		
 	}
 	
-	//Metode za dijaloge
-	
-	private Point pointDialog(Point point, boolean editable) {
-		PointDialog dlg = new PointDialog(point, editable);
-		dlg.setVisible(true);
-		
-		if(dlg.isAccepted()) {
-			int x = Integer.parseInt(dlg.getTextFieldX());
-			int y = Integer.parseInt(dlg.getTextFieldY());
-			Color outerColor = dlg.getBtnColor();
-			return new Point(x, y, outerColor);
-		}
-		
-		return null;
-	}
-	
-	private Line lineDialog(Line line, boolean editable) {
-		LineDialog dlg = new LineDialog(line, editable);
-		dlg.setVisible(true);
 
-		if (dlg.isAccepted()) {
-			int x1 = Integer.parseInt(dlg.getTextFieldX());
-			int y1 = Integer.parseInt(dlg.getTextFieldY());
-			int x2 = Integer.parseInt(dlg.getTextFieldX2());
-			int y2 = Integer.parseInt(dlg.getTextFieldY2());
-			Color outerColor = dlg.getBtnColor();
-			return new Line(new Point(x1, y1), new Point(x2, y2), outerColor);
-		}
-
-		return null;
-	}
-	
-	private Rectangle rectDialog(Rectangle rectangle, boolean editable){
-		RectangleDialog dlg = new RectangleDialog(rectangle, editable);
-		dlg.setVisible(true);
-
-		if (dlg.isAccepted()) {
-			int x = Integer.parseInt(dlg.getTextFieldX().getText());
-			int y = Integer.parseInt(dlg.getTextFieldY().getText());
-			Color innerColor = dlg.getBtnInnerColor().getBackground();
-			Color outerColor = dlg.getBtnOuterColor().getBackground();
-			int height = Integer.parseInt(dlg.getTextFieldHeight().getText());
-			int width = Integer.parseInt(dlg.getTextFieldWidth().getText());
-
-			Point p = new Point(x, y);
-			return new Rectangle(p, width, height, innerColor, outerColor);
-		}
-
-		return null;
-	}
-	
-	private Circle circleDialog(Circle circle, boolean editable){
-
-		CircleDialog dlg = new CircleDialog(circle, editable);
-		dlg.setVisible(true);
-
-		if (dlg.isAccepted()) {
-
-			int x = Integer.parseInt(dlg.getTextFieldX().getText());
-			int y = Integer.parseInt(dlg.getTextFieldY().getText());
-			int radius = Integer.parseInt(dlg.getTextFieldRadius().getText());
-			Color innerColor = dlg.getBtnInnerColor().getBackground();
-			Color outerColor = dlg.getBtnOuterColor().getBackground();
-			return new Circle(new Point(x, y), radius, innerColor, outerColor);
-		}
-		return null;
-	}
-	
-	private Donut donutDialog(Donut donut, boolean editable){
-
-		DonutDialog dlg = new DonutDialog(donut, editable);
-		dlg.setVisible(true);
-
-		if (dlg.isAccepted()) {
-
-			int x = Integer.parseInt(dlg.getTextFieldX().getText());
-			int y = Integer.parseInt(dlg.getTextFieldY().getText());
-			int innerRadius = Integer.parseInt(dlg.getTextFieldInRadius().getText());
-			int outerRadius = Integer.parseInt(dlg.getTextFieldOutRadius().getText());
-			Color innerColor = dlg.getBtnInnerColor().getBackground();
-			Color outerColor = dlg.getBtnOuterColor().getBackground();
-			if(innerRadius == 0)
-				JOptionPane.showMessageDialog(new JFrame(), "Inner radius must be greater than 0","Error", JOptionPane.WARNING_MESSAGE);
-			else if (innerRadius >= outerRadius)
-				JOptionPane.showMessageDialog(new JFrame(), "Outer radius must be greater than inner radius","Error", JOptionPane.WARNING_MESSAGE);
-			else
-				return new Donut(new Point(x, y), innerRadius, outerRadius, innerColor, outerColor);
-		}
-		return null;
-	}
-	
-	private HexagonAdapter hexDialog(HexagonAdapter hexagon, boolean editable) {
-
-		HexagonDialog dlg = new HexagonDialog(hexagon, editable);
-		dlg.setVisible(true);
-
-		if (dlg.isAccepted()) {
-			int x = Integer.parseInt(dlg.getTextFieldX().getText());
-			int y = Integer.parseInt(dlg.getTextFieldY().getText());
-			int radius = Integer.parseInt(dlg.getTextFieldRadius().getText());
-			Color innerColor = dlg.getBtnInnerColor().getBackground();
-			Color outerColor = dlg.getBtnOuterColor().getBackground();
-
-			return new HexagonAdapter(x, y, radius, innerColor, outerColor);
-		}
-
-		return null;
-	}
-	
 	private void notifyAllObservers(int size) {
 		observer.setButtonDeleteEnabled(size>0);
 		observer.setButtonModifyEnabled(size == 1);
@@ -440,7 +287,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 			commandManager.undo();
 			notifyAllObservers(shapeService.getSelected().size());
 			
-		} else if (line.contains("Redo")) {
+		} else if (line.contains("RedoButton")) {
 			commandManager.redo();
 			notifyAllObservers(selectedObjects.size());
 		} else if (line.contains("To Front")) {
@@ -526,7 +373,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 	}
 
 
-	private void selectBtnClicked(int x, int y){
+	public void select(int x, int y){
 		if(shapeService.getAll() == null || shapeService.getAll().size() == 0)
 			return;
 
@@ -573,7 +420,7 @@ public class DrawingController extends MouseAdapter implements ActionListener {
 		Point p2 = point;
 
 
-		Shape line = lineDialog(new Line(p1,p2, color), false);
+		Shape line = ViewService.lineDialog(new Line(p1,p2, color), false);
 		frame.startPoint = null;
 		return line;
 	}

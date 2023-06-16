@@ -14,7 +14,6 @@ public class DrawingView extends JPanel {
 	public DrawingView(Dimension dimension, DrawingModel model) {
 		if(dimension != null)
 			this.setPreferredSize(dimension);
-
 		this.model = model;
 		setVisible(true);
 	}
@@ -26,5 +25,6 @@ public class DrawingView extends JPanel {
 			drawingService.draw(g, shape);
 		}
 	}
+
 
 }

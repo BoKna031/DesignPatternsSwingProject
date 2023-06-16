@@ -30,8 +30,6 @@ public class DrawingFrame extends JFrame {
 		this.setJMenuBar(menu);
 		view = new DrawingView(new Dimension(800, 600), model);
 
-		setupListeners();
-
 		//dodavanje panela
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(view, BorderLayout.CENTER);
@@ -39,6 +37,16 @@ public class DrawingFrame extends JFrame {
 		getContentPane().add(topPanel, BorderLayout.NORTH);
 		getContentPane().add(rightPanel, BorderLayout.EAST);
 		getContentPane().add(logPanel, BorderLayout.PAGE_END);
+
+		view.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(isButtonSelectActive())
+					controller.select(e.getX(), e.getY());
+				else
+					controller.createShape(e.getX(), e.getY());
+			}
+		});
 
 	}
 	
@@ -50,16 +58,6 @@ public class DrawingFrame extends JFrame {
 		this.controller = controller;
 		topPanel.setController(controller);
 		menu.setController(controller);
-	}
-	
-	private void setupListeners() {
-
-		view.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				controller.mouseClicked(e);
-			}
-		});
 
 	}
 	
@@ -68,11 +66,11 @@ public class DrawingFrame extends JFrame {
 	}
 	
 	public JButton getBtnUndo() {
-		return topPanel.getBtnUndo();
+		return topPanel.getUndo();
 	}
 	
 	public JButton getBtnRedo() {
-		return topPanel.getBtnRedo();
+		return topPanel.getRedo();
 	}
 	
 	public JTextArea getLogArea() {
@@ -88,7 +86,7 @@ public class DrawingFrame extends JFrame {
 	}
 	
 	public JButton getBtnToBack() {
-		return topPanel.getBtnToBack();
+		return topPanel.getToBack();
 	}
 	
 	public JButton getBtnToFront() {
@@ -100,7 +98,7 @@ public class DrawingFrame extends JFrame {
 	}
 	
 	public JButton getBtnBringFront() {
-		return topPanel.getBtnBringFront();
+		return topPanel.getBringFront();
 	}
 	
 	public JButton getBtnNext() {
@@ -116,6 +114,10 @@ public class DrawingFrame extends JFrame {
 
 	public JToggleButton getBtnSelect() {
 		return topPanel.getBtnSelect();
+	}
+
+	private boolean isButtonSelectActive(){
+		return topPanel.getBtnSelect().isSelected();
 	}
 
 	public JButton getBtnModify() {
