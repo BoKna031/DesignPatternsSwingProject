@@ -3,6 +3,8 @@ package mvc;
 import java.awt.Color;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import command.CommandManager;
 import command.commands.CmdBringToBack;
@@ -23,17 +25,12 @@ import view.ViewService;
 
 public class DrawingController {
 
-	
 	private DrawingModel model;
 	private DrawingFrame frame;
 
 	private IShapeService shapeService;
-	private ArrayList<Shape> selectedObjects = new ArrayList<>();
 	CommandManager commandManager = CommandManager.getInstance();
-	ArrayList<String> temporarilyLogs = new ArrayList<>();
-	int i = 0;
-	
-	
+	Queue<String> temporarilyLogs;
 	ObserverUpdate observerUpdate;
 	Observer observer =  new Observer();
 
@@ -89,7 +86,7 @@ public class DrawingController {
 		}
 		frame.getBtnUndo().setEnabled(true);
 		frame.getBtnRedo().setEnabled(false);
-		notifyAllObservers(selectedObjects.size());
+		notifyAllObservers(shapeService.getSelected().size());
 		updateView();
 	}
 
@@ -100,7 +97,7 @@ public class DrawingController {
 			frame.getBtnUndo().setEnabled(false);
 		else
 			frame.getBtnUndo().setEnabled(true);
-		notifyAllObservers(selectedObjects.size());
+		notifyAllObservers(shapeService.getSelected().size());
 		updateView();
 	}
 
@@ -111,7 +108,7 @@ public class DrawingController {
 			frame.getBtnRedo().setEnabled(false);
 		else
 			frame.getBtnRedo().setEnabled(true);
-		notifyAllObservers(selectedObjects.size());
+		notifyAllObservers(shapeService.getSelected().size());
 		updateView();
 	}
 
@@ -231,7 +228,6 @@ public class DrawingController {
 			frame.clearLogArea();
 			shapeService.readFromFile(fileToLoad);
 			model.getShapes().clear();
-			selectedObjects.clear();
 			commandManager.clearNormal();
 			commandManager.clearReverse();
 			frame.getBtnUndo().setEnabled(false);
@@ -247,7 +243,7 @@ public class DrawingController {
 
 			for (int i = 0; i < model.getShapes().size(); i++) {
 				if (model.getShapes().get(i).isSelected()) {
-					selectedObjects.add(model.getShapes().get(i));
+					//selectedObjects.add(model.getShapes().get(i));
 				}
 			}
 	}
@@ -264,15 +260,13 @@ public class DrawingController {
 		commandManager.clearReverse();
 		notifyAllObservers(0);
 		frame.clearLogArea();
-		temporarilyLogs.clear();
-		
 		frame.repaint();
 
 		try {
 			ShapeService tempService = new ShapeService();
 			tempService.readFromFile(file);
 
-			temporarilyLogs = (ArrayList<String>) tempService.getAllLogs();
+			temporarilyLogs = new LinkedList<>(tempService.getAllLogs());
 		}catch (IOException | ClassNotFoundException e){
 			e.printStackTrace();
 		}
@@ -280,7 +274,7 @@ public class DrawingController {
 	
 	public void loadNext() {
 		
-		String line = temporarilyLogs.get(i);
+		String line = temporarilyLogs.poll();
 		Shape shape;
 		
 		if (line.contains("Undo")) {
@@ -289,7 +283,7 @@ public class DrawingController {
 			
 		} else if (line.contains("RedoButton")) {
 			commandManager.redo();
-			notifyAllObservers(selectedObjects.size());
+			notifyAllObservers(shapeService.getSelected().size());
 		} else if (line.contains("To Front")) {
 			shape = Converter.StringToShape(line);
 			CmdToFront cmd = new CmdToFront(shapeService,shape.getId());
@@ -362,14 +356,11 @@ public class DrawingController {
 			frame.getBtnUndo().setEnabled(true);
 			frame.getBtnRedo().setEnabled(false);
 		}
-		i++;
-		if (i == temporarilyLogs.size() || temporarilyLogs.get(i) == null) {
+		if (temporarilyLogs.size() == 0) {
 			frame.getBtnNext().setEnabled(false);
 		}
 
-		model.getShapes().clear();
-		model.getShapes().addAll(shapeService.getAll());
-		frame.repaint();
+		updateView();
 	}
 
 
