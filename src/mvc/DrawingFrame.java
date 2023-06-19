@@ -9,6 +9,7 @@ import javax.swing.*;
 
 import geometry.Point;
 import mvc.components.*;
+import mvc.components.buttons.ButtonType;
 
 public class DrawingFrame extends JFrame {
 	
@@ -17,66 +18,69 @@ public class DrawingFrame extends JFrame {
 	private DrawingController controller;
 	private DrawingView view;
 	public Point startPoint = null;
-
-	private Menu menu = new Menu();
+	private final Menu menu = new Menu();
 	private final ShapesToolbar leftPanel = new ShapesToolbar(new Dimension(110, 200));
 	private final ModificationToolbar topPanel = new ModificationToolbar(null, controller);
 	private final ColorPanel rightPanel = new ColorPanel(new Dimension(120, 200));
-
 	private final LogPanel logPanel = new LogPanel(new Dimension(0, 150));
 
-	public DrawingFrame(DrawingModel model) {
+	public DrawingFrame() {
 
-		this.setJMenuBar(menu);
-		view = new DrawingView(new Dimension(800, 600), model);
-
-		setupListeners();
+		setJMenuBar(menu);
+		//view = new DrawingView(new Dimension(800, 600), controller.getShapeService());
 
 		//dodavanje panela
 		getContentPane().setLayout(new BorderLayout());
-		getContentPane().add(view, BorderLayout.CENTER);
 		getContentPane().add(leftPanel, BorderLayout.WEST);
 		getContentPane().add(topPanel, BorderLayout.NORTH);
 		getContentPane().add(rightPanel, BorderLayout.EAST);
 		getContentPane().add(logPanel, BorderLayout.PAGE_END);
-
-	}
-	
-	public DrawingView getView() {
-		return view;
 	}
 	
 	public void setController(DrawingController controller) {
 		this.controller = controller;
 		topPanel.setController(controller);
 		menu.setController(controller);
+		configView(controller);
 	}
-	
-	private void setupListeners() {
+
+	private void configView(DrawingController controller) {
+		view = new DrawingView(this.getPreferredSize(), controller.getShapeService());
+		getContentPane().add(view, BorderLayout.CENTER);
 
 		view.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				controller.mouseClicked(e);
+				if(isButtonSelectActive())
+					controller.select(e.getX(), e.getY());
+				else
+					controller.createShape(e.getX(), e.getY());
 			}
 		});
-
 	}
-	
+
 	public JButton getBtnDelete() {
 		return topPanel.getBtnDelete();
 	}
 	
 	public JButton getBtnUndo() {
-		return topPanel.getBtnUndo();
+		return topPanel.getUndo();
 	}
-	
+
+	public void enableButton(ButtonType buttonType, boolean enable){
+		switch(buttonType){
+			case UNDO: topPanel.getUndo().setEnabled(enable); break;
+			case REDO: topPanel.getRedo().setEnabled(enable); break;
+			case NEXT: topPanel.getBtnNext().setEnabled(enable); break;
+		}
+	}
+
+	public void updateView(){
+		view.repaint();
+	}
+
 	public JButton getBtnRedo() {
-		return topPanel.getBtnRedo();
-	}
-	
-	public JTextArea getLogArea() {
-		return logPanel.getLogArea();
+		return topPanel.getRedo();
 	}
 
 	public void appendLog(String log){
@@ -88,7 +92,7 @@ public class DrawingFrame extends JFrame {
 	}
 	
 	public JButton getBtnToBack() {
-		return topPanel.getBtnToBack();
+		return topPanel.getToBack();
 	}
 	
 	public JButton getBtnToFront() {
@@ -100,11 +104,7 @@ public class DrawingFrame extends JFrame {
 	}
 	
 	public JButton getBtnBringFront() {
-		return topPanel.getBtnBringFront();
-	}
-	
-	public JButton getBtnNext() {
-		return topPanel.getBtnNext();
+		return topPanel.getBringFront();
 	}
 
 	public Color getInnerColor(){
@@ -114,35 +114,27 @@ public class DrawingFrame extends JFrame {
 		return rightPanel.getOuterColor();
 	}
 
-	public JToggleButton getBtnSelect() {
-		return topPanel.getBtnSelect();
+	private boolean isButtonSelectActive(){
+		return topPanel.getBtnSelect().isSelected();
 	}
 
 	public JButton getBtnModify() {
 		return topPanel.getBtnModify();
 	}
 
-	public JToggleButton getBtnPoint() {
-		return leftPanel.getBtnPoint();
-	}
-
-	public JToggleButton getBtnLine() {
-		return leftPanel.getBtnLine();
-	}
-
-	public JToggleButton getBtnRectangle() {
-		return leftPanel.getBtnRectangle();
-	}
-
-	public JToggleButton getBtnCircle() {
-		return leftPanel.getBtnCircle();
-	}
-
-	public JToggleButton getBtnDonut() {
-		return leftPanel.getBtnDonut();
-	}
-
-	public JToggleButton getBtnHex() {
-		return leftPanel.getBtnHex();
+	public ButtonType getSelectedButtonShape(){
+		if(leftPanel.getBtnPoint().isSelected())
+			return ButtonType.POINT;
+		if(leftPanel.getBtnLine().isSelected())
+			return ButtonType.LINE;
+		if(leftPanel.getBtnRectangle().isSelected())
+			return ButtonType.RECTANGLE;
+		if(leftPanel.getBtnCircle().isSelected())
+			return ButtonType.CIRCLE;
+		if(leftPanel.getBtnDonut().isSelected())
+			return ButtonType.DONUT;
+		if(leftPanel.getBtnHex().isSelected())
+			return ButtonType.HEXAGON;
+		return ButtonType.NONE;
 	}
 }

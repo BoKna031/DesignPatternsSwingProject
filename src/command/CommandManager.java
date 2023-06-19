@@ -46,20 +46,17 @@ public class CommandManager {
 		}
 	}
 	
-	public void clearNormal() {
+	public void clear() {
 		stackNormal.clear();
-	}
-	
-	public void clearReverse() {
 		stackReverse.clear();
 	}
 	
-	public int sizeNormal() {
-		return stackNormal.size();
+	public boolean isUndoAvailable() {
+		return stackNormal.size() > 0;
 	}
-	
-	public int sizeReverse() {
-		return stackReverse.size();
+
+	public boolean isRedoAvailable() {
+		return stackReverse.size() > 0;
 	}
 	
 	public void setFrame(DrawingFrame frame) {

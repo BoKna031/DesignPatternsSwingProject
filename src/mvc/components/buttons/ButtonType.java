@@ -1,0 +1,5 @@
+package mvc.components.buttons;
+
+public enum ButtonType {
+    NONE, POINT, LINE, RECTANGLE, CIRCLE, DONUT, HEXAGON, NEXT, SELECT, MODIFY, DELETE, TO_FRONT, TO_BACK, BRING_FRONT, BRING_BACK, UNDO, REDO
+}

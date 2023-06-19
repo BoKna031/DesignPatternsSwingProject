@@ -3,8 +3,6 @@ package command.commands;
 import command.Command;
 import geometry.Shape;
 import model.service.IShapeService;
-import mvc.DrawingModel;
-import observer.SelectedObjects;
 
 public class CmdRemove implements Command {
 

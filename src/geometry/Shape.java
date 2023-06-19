@@ -1,6 +1,4 @@
 package geometry;
-
-import java.awt.Graphics;
 import java.io.Serializable;
 
 public abstract class Shape implements Cloneable, Serializable {
@@ -16,8 +14,6 @@ public abstract class Shape implements Cloneable, Serializable {
 
 	public abstract boolean contains(int x, int y);
 
-	public abstract void draw(Graphics g);
-
 	public boolean isSelected() {
 		return selected;
 	}
@@ -25,8 +21,6 @@ public abstract class Shape implements Cloneable, Serializable {
 	public void setSelected(boolean selected) {
 		this.selected = selected;
 	}
-	
-	public abstract void drawSelection(Graphics g);
 
 	public void setId(String id){
 		this.id = id;

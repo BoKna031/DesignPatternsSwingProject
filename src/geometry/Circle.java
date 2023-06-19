@@ -1,12 +1,11 @@
 package geometry;
 
 import java.awt.Color;
-import java.awt.Graphics;
 
 public class Circle extends Shape {
 
-	private Point center;
-	private int radius;
+	private final Point center;
+	private final int radius;
 	private Color innerColor;
 	private Color outerColor;
 	
@@ -55,36 +54,6 @@ public class Circle extends Shape {
 
 	public int getRadius() {
 		return radius;
-	}
-	@Override
-	public void drawSelection(Graphics g) {
-		g.setColor(Color.BLUE);
-		g.drawRect(this.center.getX() - 3, this.center.getY() - 3, 6, 6);
-		g.drawRect(this.center.getX() + this.radius - 3, this.center.getY() - 3, 6, 6);
-		g.drawRect(this.center.getX() - this.radius - 3, this.center.getY() - 3, 6, 6);
-		g.drawRect(this.center.getX() - 3, this.center.getY() + this.radius - 3, 6, 6);
-		g.drawRect(this.center.getX() - 3, this.center.getY() - this.radius - 3, 6, 6);
-		g.setColor(Color.BLACK);
-		
-	}
-
-	@Override
-	public void draw(Graphics g) {
-		if (innerColor != null)
-			g.setColor(innerColor);
-		else
-			g.setColor(Color.black);
-		g.fillOval(this.center.getX() - this.radius, this.center.getY() - this.radius,
-				this.radius * 2, this.radius * 2);
-		if (outerColor != null)
-			g.setColor(outerColor);
-		else
-			g.setColor(Color.black);
-		g.drawOval(this.center.getX() - this.radius, this.center.getY() - this.radius,
-				this.radius * 2, this.radius * 2);
-		if (isSelected()) {
-			drawSelection(g);
-		}
 	}
 
 	@Override
