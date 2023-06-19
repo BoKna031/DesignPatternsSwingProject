@@ -391,6 +391,7 @@ public class DrawingController {
 		}
 		Point p1 = frame.startPoint;
 
+
 		Shape line = ViewService.lineDialog(new Line(p1,point, color), false);
 		frame.startPoint = null;
 		return line;

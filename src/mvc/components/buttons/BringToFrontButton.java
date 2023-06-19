@@ -11,17 +11,16 @@ import java.awt.event.ActionListener;
 public class BringToFrontButton extends JButton implements ActionListener {
 
     private final DrawingController controller;
-    private boolean enabled = false;
     public BringToFrontButton(DrawingController controller){
         Image img = Icon.BringBack.getImage();
         setIcon(new ImageIcon(img.getScaledInstance(50, 50, Image.SCALE_SMOOTH)));
         this.controller = controller;
-        setEnabled(enabled);
+        super.setEnabled(false);
         addActionListener(this);
     }
 
     public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+        super.setEnabled(enabled);
     }
 
     @Override

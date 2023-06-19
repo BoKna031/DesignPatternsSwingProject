@@ -66,9 +66,4 @@ public class Observer {
 		propertyChangeSupport.addPropertyChangeListener(pc1);
 	}
 	
-	public void removePropertyChangeListener(PropertyChangeListener pc1) {
-		propertyChangeSupport.removePropertyChangeListener(pc1);
-	}
-	
-	
 }

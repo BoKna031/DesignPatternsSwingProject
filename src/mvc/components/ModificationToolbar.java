@@ -80,11 +80,11 @@ public class ModificationToolbar extends JPanel implements ActionListener {
         return toBack;
     }
 
-    public JButton getBtnToFront() {
+    public JButton getToFront() {
         return toFront;
     }
 
-    public JButton getBtnBringBack() {
+    public JButton getBringBack() {
         return bringBack;
     }
 

@@ -27,7 +27,6 @@ public class DrawingFrame extends JFrame {
 	public DrawingFrame() {
 
 		setJMenuBar(menu);
-		//view = new DrawingView(new Dimension(800, 600), controller.getShapeService());
 
 		//dodavanje panela
 		getContentPane().setLayout(new BorderLayout());
@@ -59,28 +58,22 @@ public class DrawingFrame extends JFrame {
 		});
 	}
 
-	public JButton getBtnDelete() {
-		return topPanel.getBtnDelete();
-	}
-	
-	public JButton getBtnUndo() {
-		return topPanel.getUndo();
-	}
-
 	public void enableButton(ButtonType buttonType, boolean enable){
 		switch(buttonType){
 			case UNDO: topPanel.getUndo().setEnabled(enable); break;
 			case REDO: topPanel.getRedo().setEnabled(enable); break;
 			case NEXT: topPanel.getBtnNext().setEnabled(enable); break;
+			case MODIFY: topPanel.getBtnModify().setEnabled(enable); break;
+			case DELETE: topPanel.getBtnDelete().setEnabled(enable); break;
+			case TO_FRONT: topPanel.getToFront().setEnabled(enable); break;
+			case TO_BACK: topPanel.getToBack().setEnabled(enable); break;
+			case BRING_BACK: topPanel.getBringBack().setEnabled(enable); break;
+			case BRING_FRONT: topPanel.getBringFront().setEnabled(enable); break;
 		}
 	}
 
 	public void updateView(){
 		view.repaint();
-	}
-
-	public JButton getBtnRedo() {
-		return topPanel.getRedo();
 	}
 
 	public void appendLog(String log){
@@ -89,22 +82,6 @@ public class DrawingFrame extends JFrame {
 
 	public void clearLogArea(){
 		logPanel.clearLogArea();
-	}
-	
-	public JButton getBtnToBack() {
-		return topPanel.getToBack();
-	}
-	
-	public JButton getBtnToFront() {
-		return topPanel.getBtnToFront();
-	}
-
-	public JButton getBtnBringBack() {
-		return topPanel.getBtnBringBack();
-	}
-	
-	public JButton getBtnBringFront() {
-		return topPanel.getBringFront();
 	}
 
 	public Color getInnerColor(){
@@ -116,10 +93,6 @@ public class DrawingFrame extends JFrame {
 
 	private boolean isButtonSelectActive(){
 		return topPanel.getBtnSelect().isSelected();
-	}
-
-	public JButton getBtnModify() {
-		return topPanel.getBtnModify();
 	}
 
 	public ButtonType getSelectedButtonShape(){
