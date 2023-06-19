@@ -18,7 +18,7 @@ public class DrawingFrame extends JFrame {
 	private DrawingController controller;
 	private DrawingView view;
 	public Point startPoint = null;
-	private Menu menu = new Menu();
+	private final Menu menu = new Menu();
 	private final ShapesToolbar leftPanel = new ShapesToolbar(new Dimension(110, 200));
 	private final ModificationToolbar topPanel = new ModificationToolbar(null, controller);
 	private final ColorPanel rightPanel = new ColorPanel(new Dimension(120, 200));
@@ -35,10 +35,6 @@ public class DrawingFrame extends JFrame {
 		getContentPane().add(topPanel, BorderLayout.NORTH);
 		getContentPane().add(rightPanel, BorderLayout.EAST);
 		getContentPane().add(logPanel, BorderLayout.PAGE_END);
-	}
-	
-	public DrawingView getView() {
-		return view;
 	}
 	
 	public void setController(DrawingController controller) {
@@ -70,7 +66,19 @@ public class DrawingFrame extends JFrame {
 	public JButton getBtnUndo() {
 		return topPanel.getUndo();
 	}
-	
+
+	public void enableButton(ButtonType buttonType, boolean enable){
+		switch(buttonType){
+			case UNDO: topPanel.getUndo().setEnabled(enable); break;
+			case REDO: topPanel.getRedo().setEnabled(enable); break;
+			case NEXT: topPanel.getBtnNext().setEnabled(enable); break;
+		}
+	}
+
+	public void updateView(){
+		view.repaint();
+	}
+
 	public JButton getBtnRedo() {
 		return topPanel.getRedo();
 	}
@@ -98,20 +106,12 @@ public class DrawingFrame extends JFrame {
 	public JButton getBtnBringFront() {
 		return topPanel.getBringFront();
 	}
-	
-	public JButton getBtnNext() {
-		return topPanel.getBtnNext();
-	}
 
 	public Color getInnerColor(){
 		return rightPanel.getInnerColor();
 	}
 	public Color getOuterColor(){
 		return rightPanel.getOuterColor();
-	}
-
-	public JToggleButton getBtnSelect() {
-		return topPanel.getBtnSelect();
 	}
 
 	private boolean isButtonSelectActive(){
@@ -135,6 +135,6 @@ public class DrawingFrame extends JFrame {
 			return ButtonType.DONUT;
 		if(leftPanel.getBtnHex().isSelected())
 			return ButtonType.HEXAGON;
-		return null;
+		return ButtonType.NONE;
 	}
 }

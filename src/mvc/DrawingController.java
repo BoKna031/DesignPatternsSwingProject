@@ -19,14 +19,15 @@ import command.commands.CmdToFront;
 import geometry.*;
 import model.service.IShapeService;
 import model.service.ShapeService;
+import mvc.components.buttons.ButtonType;
 import observer.Observer;
 import observer.ObserverUpdate;
 import view.ViewService;
 
 public class DrawingController {
-	private DrawingFrame frame;
+	private final DrawingFrame frame;
 
-	private IShapeService shapeService;
+	private final IShapeService shapeService;
 	CommandManager commandManager = CommandManager.getInstance();
 	Queue<String> temporarilyLogs;
 	ObserverUpdate observerUpdate;
@@ -73,12 +74,12 @@ public class DrawingController {
 		CmdAdd cmd = new CmdAdd(shapeService, newShape);
 		commandManager.execute(cmd);
 
-		frame.getBtnUndo().setEnabled(true);
-		frame.getBtnRedo().setEnabled(false);
+		frame.enableButton(ButtonType.UNDO, true);
+		frame.enableButton(ButtonType.REDO, false);
+		frame.enableButton(ButtonType.NEXT, false);
 
-		updateView();
-		frame.getBtnNext().setEnabled(false);
-		
+		frame.appendLog(shapeService.getLastLog());
+		frame.updateView();
 	}
 
 	public void delete(){
@@ -86,32 +87,28 @@ public class DrawingController {
 			CmdRemove cmdRemove = new CmdRemove(shapeService, s);
 			commandManager.execute(cmdRemove);
 		}
-		frame.getBtnUndo().setEnabled(true);
-		frame.getBtnRedo().setEnabled(false);
+		frame.enableButton(ButtonType.UNDO, true);
+		frame.enableButton(ButtonType.REDO, false);
 		notifyAllObservers(shapeService.getSelected().size());
-		updateView();
+
+		frame.appendLog(shapeService.getLastLog());
+		frame.updateView();
 	}
 
 	public void undo(){
 		commandManager.undo();
-		frame.getBtnRedo().setEnabled(true);
-		if(commandManager.sizeNormal() == 0)
-			frame.getBtnUndo().setEnabled(false);
-		else
-			frame.getBtnUndo().setEnabled(true);
+		frame.enableButton(ButtonType.REDO, true);
+		frame.enableButton(ButtonType.UNDO, commandManager.isUndoAvailable());
 		notifyAllObservers(shapeService.getSelected().size());
-		updateView();
+		frame.updateView();
 	}
 
 	public void redo(){
 		commandManager.redo();
-		frame.getBtnUndo().setEnabled(true);
-		if (commandManager.sizeReverse() == 0)
-			frame.getBtnRedo().setEnabled(false);
-		else
-			frame.getBtnRedo().setEnabled(true);
+		frame.enableButton(ButtonType.UNDO, true);
+		frame.enableButton(ButtonType.REDO, commandManager.isRedoAvailable());
 		notifyAllObservers(shapeService.getSelected().size());
-		updateView();
+		frame.updateView();
 	}
 
 	public void bringToBack(){
@@ -122,9 +119,10 @@ public class DrawingController {
 		CmdBringToBack cmd = new CmdBringToBack(shapeService, shape.getId());
 		commandManager.execute(cmd);
 
-		frame.getBtnUndo().setEnabled(true);
-		frame.getBtnRedo().setEnabled(false);
-		updateView();
+		frame.enableButton(ButtonType.UNDO, true);
+		frame.enableButton(ButtonType.REDO, false);
+		frame.appendLog(shapeService.getLastLog());
+		frame.updateView();
 	}
 
 	public void bringToFront(){
@@ -135,9 +133,10 @@ public class DrawingController {
 		CmdBringToFront cmd = new CmdBringToFront(shapeService, shape.getId());
 		commandManager.execute(cmd);
 
-		frame.getBtnUndo().setEnabled(true);
-		frame.getBtnRedo().setEnabled(false);
-		updateView();
+		frame.enableButton(ButtonType.UNDO, true);
+		frame.enableButton(ButtonType.REDO, false);
+		frame.appendLog(shapeService.getLastLog());
+		frame.updateView();
 	}
 
 	public void modify() throws Exception{
@@ -171,10 +170,10 @@ public class DrawingController {
 		ShapeModify shapeModify = new ShapeModify(shapeService, shape, newShape);
 		commandManager.execute(shapeModify);
 
-		frame.getBtnUndo().setEnabled(true);
-		frame.getBtnRedo().setEnabled(false);
-
-		updateView();
+		frame.enableButton(ButtonType.UNDO, true);
+		frame.enableButton(ButtonType.REDO, false);
+		frame.appendLog(shapeService.getLastLog());
+		frame.updateView();
 	}
 
 	public void toFront() {
@@ -184,10 +183,10 @@ public class DrawingController {
 			CmdToFront cmd = new CmdToFront(shapeService, shape.getId());
 			commandManager.execute(cmd);
 
-			frame.getBtnUndo().setEnabled(true);
-			frame.getBtnRedo().setEnabled(false);
-
-			updateView();
+			frame.enableButton(ButtonType.UNDO, true);
+			frame.enableButton(ButtonType.REDO, false);
+			frame.appendLog(shapeService.getLastLog());
+			frame.updateView();
 		}
 	}
 
@@ -198,14 +197,11 @@ public class DrawingController {
 			CmdToBack cmd = new CmdToBack(shapeService, shape.getId());
 			commandManager.execute(cmd);
 
-			frame.getBtnUndo().setEnabled(true);
-			frame.getBtnRedo().setEnabled(false);
-			updateView();
+			frame.enableButton(ButtonType.UNDO, true);
+			frame.enableButton(ButtonType.REDO, false);
+			frame.appendLog(shapeService.getLastLog());
+			frame.updateView();
 		}
-	}
-
-	private void updateView(){
-		frame.getView().repaint();
 	}
 
 	public IShapeService getShapeService(){
@@ -224,35 +220,32 @@ public class DrawingController {
 	public void save(File file) throws IOException {
 			shapeService.saveToFile(file);
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	public void load(File fileToLoad) throws ClassNotFoundException, IOException {
-			frame.getBtnNext().setEnabled(false);
-			frame.clearLogArea();
-			shapeService.readFromFile(fileToLoad);
-			commandManager.clearNormal();
-			commandManager.clearReverse();
-			frame.getBtnUndo().setEnabled(false);
-			frame.getBtnRedo().setEnabled(false);
+		frame.enableButton(ButtonType.NEXT, false);
+		frame.clearLogArea();
+		shapeService.readFromFile(fileToLoad);
+		commandManager.clear();
+		frame.enableButton(ButtonType.UNDO, false);
+		frame.enableButton(ButtonType.REDO, false);
 
-			frame.getView().repaint();
+		frame.updateView();
 
-			for(String log: shapeService.getAllLogs()){
-				frame.appendLog(log);
-			}
+		for(String log: shapeService.getAllLogs()){
+			frame.appendLog(log);
+		}
 	}
 	
 	public void loadOneByOne(File file) throws IOException {
-		
-		frame.getBtnNext().setEnabled(true);
-		frame.getBtnUndo().setEnabled(false);
-		frame.getBtnRedo().setEnabled(false);
+		frame.enableButton(ButtonType.NEXT, true);
+		frame.enableButton(ButtonType.UNDO, false);
+		frame.enableButton(ButtonType.REDO, false);
 
-		commandManager.clearNormal();
-		commandManager.clearReverse();
+		commandManager.clear();
+
 		notifyAllObservers(0);
 		frame.clearLogArea();
-		frame.repaint();
+		frame.updateView();
 
 		try {
 			ShapeService tempService = new ShapeService();
@@ -265,14 +258,15 @@ public class DrawingController {
 	}
 	
 	public void loadNext() {
-		
 		String line = temporarilyLogs.poll();
+		if(line == null){
+			frame.enableButton(ButtonType.NEXT, false);
+			return;
+		}
 		Shape shape;
-		
 		if (line.contains("Undo")) {
 			commandManager.undo();
 			notifyAllObservers(shapeService.getSelected().size());
-			
 		} else if (line.contains("RedoButton")) {
 			commandManager.redo();
 			notifyAllObservers(shapeService.getSelected().size());
@@ -280,34 +274,35 @@ public class DrawingController {
 			shape = Converter.StringToShape(line);
 			CmdToFront cmd = new CmdToFront(shapeService,shape.getId());
 			commandManager.execute(cmd);
-			frame.getBtnUndo().setEnabled(true);
-			frame.getBtnRedo().setEnabled(false);
+			frame.enableButton(ButtonType.UNDO, true);
+			frame.enableButton(ButtonType.REDO, false);
 			
 		} else if (line.contains("To Back")) {
 			shape = Converter.StringToShape(line);
 			CmdToBack cmd = new CmdToBack(shapeService,shape.getId());
 			commandManager.execute(cmd);
-			frame.getBtnUndo().setEnabled(true);
-			frame.getBtnRedo().setEnabled(false);
+
+			frame.enableButton(ButtonType.UNDO, true);
+			frame.enableButton(ButtonType.REDO, false);
 		} else if (line.contains("Bring Front")) {
 			shape = Converter.StringToShape(line);
 			CmdBringToFront cmd = new CmdBringToFront(shapeService,shape.getId());
 			commandManager.execute(cmd);
-			frame.getBtnUndo().setEnabled(true);
-			frame.getBtnRedo().setEnabled(false);
+			frame.enableButton(ButtonType.UNDO, true);
+			frame.enableButton(ButtonType.REDO, false);
 		} else if (line.contains("Bring Back")) {
 			shape = Converter.StringToShape(line);
 			CmdBringToBack cmd = new CmdBringToBack(shapeService,shape.getId());
 			commandManager.execute(cmd);
-			frame.getBtnUndo().setEnabled(true);
-			frame.getBtnRedo().setEnabled(false);
+			frame.enableButton(ButtonType.UNDO, true);
+			frame.enableButton(ButtonType.REDO, false);
 		} else if (line.contains("Add")) {
 			line = line.replaceAll(" - Add", "");
 			shape = Converter.StringToShape(line);
 			CmdAdd cmd = new CmdAdd(shapeService,shape);
 			commandManager.execute(cmd);
-			frame.getBtnUndo().setEnabled(true);
-			frame.getBtnRedo().setEnabled(false);
+			frame.enableButton(ButtonType.UNDO, true);
+			frame.enableButton(ButtonType.REDO, false);
 
 		} else if (line.contains("Modify to")) {
 			String[] shapeDescriptions = line.split(",Modify to ");
@@ -316,39 +311,35 @@ public class DrawingController {
 
 			ShapeModify shapeModify = new ShapeModify(shapeService, shapeService.read(oldShape.getId()), shape);
 			commandManager.execute(shapeModify);
-
-			frame.getBtnUndo().setEnabled(true);
-			frame.getBtnRedo().setEnabled(false);
+			frame.enableButton(ButtonType.UNDO, true);
+			frame.enableButton(ButtonType.REDO, false);
 				
 		} else if (line.contains("Deleted")) {
 			shape = Converter.StringToShape(line);
 			CmdRemove cmdDelete = new CmdRemove(shapeService, shape);
 			commandManager.execute(cmdDelete);
-
-			frame.getBtnUndo().setEnabled(true);
-			frame.getBtnRedo().setEnabled(false);
+			frame.enableButton(ButtonType.UNDO, true);
+			frame.enableButton(ButtonType.REDO, false);
 		} else if (line.contains("Selected")) {
 			shape = Converter.StringToShape(line);
 			CmdSelect cmdSelect = new CmdSelect(shapeService, shape.getId());
 			commandManager.execute(cmdSelect);
 
 			notifyAllObservers(shapeService.getSelected().size());
-			frame.getBtnUndo().setEnabled(true);
-			frame.getBtnRedo().setEnabled(false);
+			frame.enableButton(ButtonType.UNDO, true);
+			frame.enableButton(ButtonType.REDO, false);
 		} else if (line.contains("Deselected")) {
 			shape = Converter.StringToShape(line);
 			CmdDeselect cmdDeselect = new CmdDeselect(shapeService, shape.getId());
 			commandManager.execute(cmdDeselect);
 
 			notifyAllObservers(shapeService.getSelected().size());
-			frame.getBtnUndo().setEnabled(true);
-			frame.getBtnRedo().setEnabled(false);
+			frame.enableButton(ButtonType.UNDO, true);
+			frame.enableButton(ButtonType.REDO, false);
 		}
-		if (temporarilyLogs.size() == 0) {
-			frame.getBtnNext().setEnabled(false);
-		}
-
-		updateView();
+		frame.enableButton(ButtonType.NEXT, temporarilyLogs.size() > 0);
+		frame.appendLog(line);
+		frame.updateView();
 	}
 
 
@@ -358,17 +349,20 @@ public class DrawingController {
 
 		boolean isObjectFound = changeStatusOfSelectedObject(x, y);
 
-		if(!isObjectFound) //if user clicks on background
+		if(isObjectFound)
+			frame.appendLog(shapeService.getLastLog());
+		else	//if user clicks on background
 			deselectAllObjects();
 
 		notifyAllObservers(shapeService.getSelected().size());
-
+		frame.updateView();
 	}
 
 	private void deselectAllObjects(){
 		for (Shape s : shapeService.getSelected()) {
 			CmdDeselect deselectCommand = new CmdDeselect(shapeService, s.getId());
 			commandManager.execute(deselectCommand);
+			frame.appendLog(shapeService.getLastLog());
 		}
 	}
 	private boolean changeStatusOfSelectedObject(int x, int y) {
@@ -396,10 +390,8 @@ public class DrawingController {
 			return null;
 		}
 		Point p1 = frame.startPoint;
-		Point p2 = point;
 
-
-		Shape line = ViewService.lineDialog(new Line(p1,p2, color), false);
+		Shape line = ViewService.lineDialog(new Line(p1,point, color), false);
 		frame.startPoint = null;
 		return line;
 	}
