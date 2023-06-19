@@ -9,6 +9,7 @@ import javax.swing.*;
 
 import geometry.Point;
 import mvc.components.*;
+import mvc.components.buttons.ButtonType;
 
 public class DrawingFrame extends JFrame {
 	
@@ -17,37 +18,23 @@ public class DrawingFrame extends JFrame {
 	private DrawingController controller;
 	private DrawingView view;
 	public Point startPoint = null;
-
 	private Menu menu = new Menu();
 	private final ShapesToolbar leftPanel = new ShapesToolbar(new Dimension(110, 200));
 	private final ModificationToolbar topPanel = new ModificationToolbar(null, controller);
 	private final ColorPanel rightPanel = new ColorPanel(new Dimension(120, 200));
-
 	private final LogPanel logPanel = new LogPanel(new Dimension(0, 150));
 
-	public DrawingFrame(DrawingModel model) {
+	public DrawingFrame() {
 
-		this.setJMenuBar(menu);
-		view = new DrawingView(new Dimension(800, 600), model);
+		setJMenuBar(menu);
+		//view = new DrawingView(new Dimension(800, 600), controller.getShapeService());
 
 		//dodavanje panela
 		getContentPane().setLayout(new BorderLayout());
-		getContentPane().add(view, BorderLayout.CENTER);
 		getContentPane().add(leftPanel, BorderLayout.WEST);
 		getContentPane().add(topPanel, BorderLayout.NORTH);
 		getContentPane().add(rightPanel, BorderLayout.EAST);
 		getContentPane().add(logPanel, BorderLayout.PAGE_END);
-
-		view.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				if(isButtonSelectActive())
-					controller.select(e.getX(), e.getY());
-				else
-					controller.createShape(e.getX(), e.getY());
-			}
-		});
-
 	}
 	
 	public DrawingView getView() {
@@ -58,9 +45,24 @@ public class DrawingFrame extends JFrame {
 		this.controller = controller;
 		topPanel.setController(controller);
 		menu.setController(controller);
-
+		configView(controller);
 	}
-	
+
+	private void configView(DrawingController controller) {
+		view = new DrawingView(this.getPreferredSize(), controller.getShapeService());
+		getContentPane().add(view, BorderLayout.CENTER);
+
+		view.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(isButtonSelectActive())
+					controller.select(e.getX(), e.getY());
+				else
+					controller.createShape(e.getX(), e.getY());
+			}
+		});
+	}
+
 	public JButton getBtnDelete() {
 		return topPanel.getBtnDelete();
 	}
@@ -71,10 +73,6 @@ public class DrawingFrame extends JFrame {
 	
 	public JButton getBtnRedo() {
 		return topPanel.getRedo();
-	}
-	
-	public JTextArea getLogArea() {
-		return logPanel.getLogArea();
 	}
 
 	public void appendLog(String log){
@@ -124,27 +122,19 @@ public class DrawingFrame extends JFrame {
 		return topPanel.getBtnModify();
 	}
 
-	public JToggleButton getBtnPoint() {
-		return leftPanel.getBtnPoint();
-	}
-
-	public JToggleButton getBtnLine() {
-		return leftPanel.getBtnLine();
-	}
-
-	public JToggleButton getBtnRectangle() {
-		return leftPanel.getBtnRectangle();
-	}
-
-	public JToggleButton getBtnCircle() {
-		return leftPanel.getBtnCircle();
-	}
-
-	public JToggleButton getBtnDonut() {
-		return leftPanel.getBtnDonut();
-	}
-
-	public JToggleButton getBtnHex() {
-		return leftPanel.getBtnHex();
+	public ButtonType getSelectedButtonShape(){
+		if(leftPanel.getBtnPoint().isSelected())
+			return ButtonType.POINT;
+		if(leftPanel.getBtnLine().isSelected())
+			return ButtonType.LINE;
+		if(leftPanel.getBtnRectangle().isSelected())
+			return ButtonType.RECTANGLE;
+		if(leftPanel.getBtnCircle().isSelected())
+			return ButtonType.CIRCLE;
+		if(leftPanel.getBtnDonut().isSelected())
+			return ButtonType.DONUT;
+		if(leftPanel.getBtnHex().isSelected())
+			return ButtonType.HEXAGON;
+		return null;
 	}
 }

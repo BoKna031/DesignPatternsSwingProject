@@ -7,9 +7,8 @@ public class DrawingApp {
 
 	public static void main(String[] args) {
 		ShapeService shapeService = new ShapeService();
-		DrawingModel model = new DrawingModel();
-		DrawingFrame frame = new DrawingFrame(model);
-		DrawingController controller = new DrawingController(model, frame, shapeService);
+		DrawingFrame frame = new DrawingFrame();
+		DrawingController controller = new DrawingController(frame, shapeService);
 		frame.setController(controller);
 		
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

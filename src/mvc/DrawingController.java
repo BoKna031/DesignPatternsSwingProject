@@ -24,8 +24,6 @@ import observer.ObserverUpdate;
 import view.ViewService;
 
 public class DrawingController {
-
-	private DrawingModel model;
 	private DrawingFrame frame;
 
 	private IShapeService shapeService;
@@ -35,9 +33,8 @@ public class DrawingController {
 	Observer observer =  new Observer();
 
 	
-	public DrawingController(DrawingModel model, DrawingFrame frame, IShapeService shapeService) {
+	public DrawingController(DrawingFrame frame, IShapeService shapeService) {
 		this.shapeService = shapeService;
-		this.model = model;
 		this.frame = frame;
 		commandManager.setFrame(frame);
 		observerUpdate = new ObserverUpdate(frame);
@@ -50,22 +47,27 @@ public class DrawingController {
 		Color outerColor = frame.getOuterColor();
 		Shape newShape;
 		Point p = new Point(x,y, outerColor);
-		if (frame.getBtnPoint().isSelected()) {
-			newShape = ViewService.pointDialog(p, false);
-		} else if (frame.getBtnLine().isSelected()) {
-			newShape = lineBtnClicked(p,outerColor);
-			if(newShape == null)
+		switch (frame.getSelectedButtonShape()){
+			case POINT: newShape = ViewService.pointDialog(p, false); break;
+			case LINE:
+				newShape = lineBtnClicked(p,outerColor);
+				if(newShape == null)
+					return;
+				break;
+			case RECTANGLE:
+				newShape = ViewService.rectDialog(new Rectangle(p, 0, 0, innerColor, outerColor), false);
+				break;
+			case CIRCLE:
+				newShape = ViewService.circleDialog(new Circle(p,0,innerColor,outerColor), false);
+				break;
+			case DONUT:
+				newShape = ViewService.donutDialog(new Donut(p,0,0,innerColor,outerColor), false);
+				break;
+			case HEXAGON:
+				newShape = ViewService.hexDialog(new HexagonAdapter(x, y, 0, innerColor, outerColor), false);
+				break;
+			default:
 				return;
-		} else if (frame.getBtnRectangle().isSelected()) {
-			newShape = ViewService.rectDialog(new Rectangle(p, 0, 0, innerColor, outerColor), false);
-		} else if (frame.getBtnCircle().isSelected()) {
-			newShape = ViewService.circleDialog(new Circle(p,0,innerColor,outerColor), false);
-		} else if (frame.getBtnDonut().isSelected()) {
-			newShape = ViewService.donutDialog(new Donut(p,0,0,innerColor,outerColor), false);
-		} else if (frame.getBtnHex().isSelected()) {
-			newShape = ViewService.hexDialog(new HexagonAdapter(x, y, 0, innerColor, outerColor), false);
-		} else {
-			return;
 		}
 
 		CmdAdd cmd = new CmdAdd(shapeService, newShape);
@@ -203,11 +205,12 @@ public class DrawingController {
 	}
 
 	private void updateView(){
-		model.getShapes().clear();
-		model.getShapes().addAll(shapeService.getAll());
 		frame.getView().repaint();
 	}
-	
+
+	public IShapeService getShapeService(){
+		return shapeService;
+	}
 
 	private void notifyAllObservers(int size) {
 		observer.setButtonDeleteEnabled(size>0);
@@ -227,24 +230,15 @@ public class DrawingController {
 			frame.getBtnNext().setEnabled(false);
 			frame.clearLogArea();
 			shapeService.readFromFile(fileToLoad);
-			model.getShapes().clear();
 			commandManager.clearNormal();
 			commandManager.clearReverse();
 			frame.getBtnUndo().setEnabled(false);
 			frame.getBtnRedo().setEnabled(false);
 
-			model.getShapes().addAll(shapeService.getAll());
-
 			frame.getView().repaint();
 
 			for(String log: shapeService.getAllLogs()){
 				frame.appendLog(log);
-			}
-
-			for (int i = 0; i < model.getShapes().size(); i++) {
-				if (model.getShapes().get(i).isSelected()) {
-					//selectedObjects.add(model.getShapes().get(i));
-				}
 			}
 	}
 	
@@ -253,8 +247,6 @@ public class DrawingController {
 		frame.getBtnNext().setEnabled(true);
 		frame.getBtnUndo().setEnabled(false);
 		frame.getBtnRedo().setEnabled(false);
-		
-		model.getShapes().clear();
 
 		commandManager.clearNormal();
 		commandManager.clearReverse();
@@ -314,8 +306,6 @@ public class DrawingController {
 			shape = Converter.StringToShape(line);
 			CmdAdd cmd = new CmdAdd(shapeService,shape);
 			commandManager.execute(cmd);
-			model.getShapes().clear();
-			model.getShapes().addAll(shapeService.getAll());
 			frame.getBtnUndo().setEnabled(true);
 			frame.getBtnRedo().setEnabled(false);
 
@@ -326,8 +316,6 @@ public class DrawingController {
 
 			ShapeModify shapeModify = new ShapeModify(shapeService, shapeService.read(oldShape.getId()), shape);
 			commandManager.execute(shapeModify);
-			model.getShapes().clear();
-			model.getShapes().addAll(shapeService.getAll());
 
 			frame.getBtnUndo().setEnabled(true);
 			frame.getBtnRedo().setEnabled(false);

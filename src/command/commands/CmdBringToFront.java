@@ -1,9 +1,7 @@
 package command.commands;
 
 import command.Command;
-import geometry.Shape;
 import model.service.IShapeService;
-import mvc.DrawingModel;
 
 public class CmdBringToFront implements Command {
 
