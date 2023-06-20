@@ -52,8 +52,6 @@ public class DrawingController {
 			case POINT: newShape = ViewService.pointDialog(p, false); break;
 			case LINE:
 				newShape = lineBtnClicked(p,outerColor);
-				if(newShape == null)
-					return;
 				break;
 			case RECTANGLE:
 				newShape = ViewService.rectDialog(new Rectangle(p, 0, 0, innerColor, outerColor), false);
@@ -70,6 +68,8 @@ public class DrawingController {
 			default:
 				return;
 		}
+		if(newShape == null)
+			return;
 
 		CmdAdd cmd = new CmdAdd(shapeService, newShape);
 		commandManager.execute(cmd);
@@ -167,6 +167,9 @@ public class DrawingController {
 			default:
 				throw new Exception("Not valid shape");
 		}
+		if(newShape == null)
+			return;
+
 		ShapeModify shapeModify = new ShapeModify(shapeService, shape, newShape);
 		commandManager.execute(shapeModify);
 
