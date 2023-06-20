@@ -54,7 +54,14 @@ public class CommandManager {
 		unexecutedCommands.clear();
 		logs.clear();
 	}
-	
+
+	public String getLastLog(){
+		if (!logs.isEmpty()){
+			return logs.get(logs.size() - 1);
+		}
+		return null;
+	}
+
 	public boolean isUndoAvailable() {
 		return executedCommands.size() > 0;
 	}

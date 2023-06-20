@@ -73,12 +73,11 @@ public class DrawingController {
 
 		CmdAdd cmd = new CmdAdd(shapeService, newShape);
 		commandManager.execute(cmd);
+		frame.appendLog(commandManager.getLastLog());
 
 		frame.enableButton(ButtonType.UNDO, true);
 		frame.enableButton(ButtonType.REDO, false);
 		frame.enableButton(ButtonType.NEXT, false);
-
-		frame.appendLog(shapeService.getLastLog());
 		frame.updateView();
 	}
 
@@ -86,17 +85,19 @@ public class DrawingController {
 		for(Shape s: shapeService.getSelected()){
 			CmdRemove cmdRemove = new CmdRemove(shapeService, s);
 			commandManager.execute(cmdRemove);
+			frame.appendLog(commandManager.getLastLog());
 		}
 		frame.enableButton(ButtonType.UNDO, true);
 		frame.enableButton(ButtonType.REDO, false);
 		notifyAllObservers(shapeService.getSelected().size());
 
-		frame.appendLog(shapeService.getLastLog());
 		frame.updateView();
 	}
 
 	public void undo(){
 		commandManager.undo();
+		frame.appendLog(commandManager.getLastLog());
+
 		frame.enableButton(ButtonType.REDO, true);
 		frame.enableButton(ButtonType.UNDO, commandManager.isUndoAvailable());
 		notifyAllObservers(shapeService.getSelected().size());
@@ -105,6 +106,8 @@ public class DrawingController {
 
 	public void redo(){
 		commandManager.redo();
+		frame.appendLog(commandManager.getLastLog());
+
 		frame.enableButton(ButtonType.UNDO, true);
 		frame.enableButton(ButtonType.REDO, commandManager.isRedoAvailable());
 		notifyAllObservers(shapeService.getSelected().size());
@@ -118,10 +121,10 @@ public class DrawingController {
 		Shape shape = selectedShapes.get(0);
 		CmdBringToBack cmd = new CmdBringToBack(shapeService, shape.getId());
 		commandManager.execute(cmd);
+		frame.appendLog(commandManager.getLastLog());
 
 		frame.enableButton(ButtonType.UNDO, true);
 		frame.enableButton(ButtonType.REDO, false);
-		frame.appendLog(shapeService.getLastLog());
 		frame.updateView();
 	}
 
@@ -132,10 +135,10 @@ public class DrawingController {
 		Shape shape = selectedShapes.get(0);
 		CmdBringToFront cmd = new CmdBringToFront(shapeService, shape.getId());
 		commandManager.execute(cmd);
+		frame.appendLog(commandManager.getLastLog());
 
 		frame.enableButton(ButtonType.UNDO, true);
 		frame.enableButton(ButtonType.REDO, false);
-		frame.appendLog(shapeService.getLastLog());
 		frame.updateView();
 	}
 
@@ -172,10 +175,10 @@ public class DrawingController {
 
 		ShapeModify shapeModify = new ShapeModify(shapeService, shape, newShape);
 		commandManager.execute(shapeModify);
+		frame.appendLog(commandManager.getLastLog());
 
 		frame.enableButton(ButtonType.UNDO, true);
 		frame.enableButton(ButtonType.REDO, false);
-		frame.appendLog(shapeService.getLastLog());
 		frame.updateView();
 	}
 
@@ -185,10 +188,10 @@ public class DrawingController {
 			Shape shape = selectedShapes.get(0);
 			CmdToFront cmd = new CmdToFront(shapeService, shape.getId());
 			commandManager.execute(cmd);
+			frame.appendLog(commandManager.getLastLog());
 
 			frame.enableButton(ButtonType.UNDO, true);
 			frame.enableButton(ButtonType.REDO, false);
-			frame.appendLog(shapeService.getLastLog());
 			frame.updateView();
 		}
 	}
@@ -199,10 +202,10 @@ public class DrawingController {
 			Shape shape = selectedShapes.get(0);
 			CmdToBack cmd = new CmdToBack(shapeService, shape.getId());
 			commandManager.execute(cmd);
+			frame.appendLog(commandManager.getLastLog());
 
 			frame.enableButton(ButtonType.UNDO, true);
 			frame.enableButton(ButtonType.REDO, false);
-			frame.appendLog(shapeService.getLastLog());
 			frame.updateView();
 		}
 	}
@@ -235,7 +238,7 @@ public class DrawingController {
 		frame.updateView();
 
 		for(String log: shapeService.getAllLogs()){
-			frame.appendLog(log);
+			frame.appendLog(log); //TODO
 		}
 	}
 	
@@ -279,7 +282,6 @@ public class DrawingController {
 			commandManager.execute(cmd);
 			frame.enableButton(ButtonType.UNDO, true);
 			frame.enableButton(ButtonType.REDO, false);
-			
 		} else if (line.contains("To Back")) {
 			shape = Converter.StringToShape(line);
 			CmdToBack cmd = new CmdToBack(shapeService,shape.getId());
@@ -341,7 +343,7 @@ public class DrawingController {
 			frame.enableButton(ButtonType.REDO, false);
 		}
 		frame.enableButton(ButtonType.NEXT, temporarilyLogs.size() > 0);
-		frame.appendLog(line);
+		frame.appendLog(commandManager.getLastLog());
 		frame.updateView();
 	}
 
@@ -353,7 +355,7 @@ public class DrawingController {
 		boolean isObjectFound = changeStatusOfSelectedObject(x, y);
 
 		if(isObjectFound)
-			frame.appendLog(shapeService.getLastLog());
+			frame.appendLog(commandManager.getLastLog());
 		else	//if user clicks on background
 			deselectAllObjects();
 
@@ -365,7 +367,7 @@ public class DrawingController {
 		for (Shape s : shapeService.getSelected()) {
 			CmdDeselect deselectCommand = new CmdDeselect(shapeService, s.getId());
 			commandManager.execute(deselectCommand);
-			frame.appendLog(shapeService.getLastLog());
+			frame.appendLog(commandManager.getLastLog());
 		}
 	}
 	private boolean changeStatusOfSelectedObject(int x, int y) {
@@ -393,7 +395,6 @@ public class DrawingController {
 			return null;
 		}
 		Point p1 = frame.startPoint;
-
 
 		Shape line = ViewService.lineDialog(new Line(p1,point, color), false);
 		frame.startPoint = null;
