@@ -1,6 +1,6 @@
 package dialogs;
 
-import geometry.Line;
+import model.entity.geometry.Line;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;

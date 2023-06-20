@@ -1,4 +1,4 @@
-package geometry;
+package model.entity.geometry;
 
 import java.awt.Color;
 import hexagon.*;

@@ -1,6 +1,6 @@
 package model.repository;
 
-import geometry.Shape;
+import model.entity.geometry.Shape;
 import strategy.SaveLog;
 import strategy.SaveManager;
 import strategy.SavePainting;

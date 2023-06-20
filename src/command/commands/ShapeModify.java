@@ -1,8 +1,9 @@
 package command.commands;
 
 import command.Command;
-import geometry.Shape;
+import model.entity.geometry.Shape;
 import model.service.IShapeService;
+import model.service.LogService;
 
 public class ShapeModify implements Command {
 
@@ -35,6 +36,11 @@ public class ShapeModify implements Command {
 			e.printStackTrace();
 		}
 
+	}
+
+	@Override
+	public String getLog() {
+		return LogService.modify(oldState, newState);
 	}
 
 }

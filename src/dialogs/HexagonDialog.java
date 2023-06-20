@@ -1,6 +1,6 @@
 package dialogs;
 
-import geometry.HexagonAdapter;
+import model.entity.geometry.HexagonAdapter;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;

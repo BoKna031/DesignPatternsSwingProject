@@ -1,9 +1,9 @@
 package view;
 
-import geometry.*;
-import geometry.Point;
-import geometry.Rectangle;
-import geometry.Shape;
+import model.entity.geometry.*;
+import model.entity.geometry.Point;
+import model.entity.geometry.Rectangle;
+import model.entity.geometry.Shape;
 import hexagon.Hexagon;
 
 import java.awt.*;

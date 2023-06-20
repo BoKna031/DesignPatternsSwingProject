@@ -1,7 +1,7 @@
 package view;
 
 import dialogs.*;
-import geometry.*;
+import model.entity.geometry.*;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -40,7 +40,7 @@ public class ViewService {
         return null;
     }
 
-    public static Rectangle rectDialog(geometry.Rectangle rectangle, boolean editable){
+    public static Rectangle rectDialog(model.entity.geometry.Rectangle rectangle, boolean editable){
         RectangleDialog dlg = new RectangleDialog(rectangle, editable);
         dlg.setVisible(true);
 

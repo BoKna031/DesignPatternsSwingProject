@@ -2,6 +2,7 @@ package command.commands;
 
 import command.Command;
 import model.service.IShapeService;
+import model.service.LogService;
 
 public class CmdDeselect implements Command {
 	String shapeId;
@@ -28,6 +29,11 @@ public class CmdDeselect implements Command {
 		} catch (NoSuchFieldException e) {
 			e.getMessage();
 		}
+	}
+
+	@Override
+	public String getLog() {
+		return LogService.deselect(shapeId);
 	}
 
 

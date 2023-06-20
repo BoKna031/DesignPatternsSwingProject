@@ -16,7 +16,8 @@ import command.commands.CmdDeselect;
 import command.commands.CmdSelect;
 import command.commands.CmdToBack;
 import command.commands.CmdToFront;
-import geometry.*;
+import model.entity.Converter;
+import model.entity.geometry.*;
 import model.service.IShapeService;
 import model.service.ShapeService;
 import mvc.components.buttons.ButtonType;
@@ -37,7 +38,6 @@ public class DrawingController {
 	public DrawingController(DrawingFrame frame, IShapeService shapeService) {
 		this.shapeService = shapeService;
 		this.frame = frame;
-		commandManager.setFrame(frame);
 		observerUpdate = new ObserverUpdate(frame);
 		observer.addPropertyChangeListener(observerUpdate);
 	}

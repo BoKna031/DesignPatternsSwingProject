@@ -7,7 +7,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.*;
 
-import geometry.Point;
+import model.entity.geometry.Point;
 import mvc.components.*;
 import mvc.components.buttons.ButtonType;
 

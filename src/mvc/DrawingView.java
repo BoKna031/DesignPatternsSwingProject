@@ -23,7 +23,7 @@ public class DrawingView extends JPanel {
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 
-		for(geometry.Shape shape: service.getAll()) {
+		for(model.entity.geometry.Shape shape: service.getAll()) {
 			drawingService.draw(g, shape);
 		}
 	}

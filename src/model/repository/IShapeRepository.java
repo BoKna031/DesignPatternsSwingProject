@@ -1,6 +1,6 @@
 package model.repository;
 
-import geometry.Shape;
+import model.entity.geometry.Shape;
 
 import java.util.Collection;
 

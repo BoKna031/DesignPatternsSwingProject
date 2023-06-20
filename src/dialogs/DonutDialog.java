@@ -1,6 +1,6 @@
 package dialogs;
 
-import geometry.Donut;
+import model.entity.geometry.Donut;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;

@@ -1,6 +1,6 @@
 package model.repository;
 
-import geometry.*;
+import model.entity.geometry.*;
 
 import java.util.Collection;
 import java.util.HashMap;

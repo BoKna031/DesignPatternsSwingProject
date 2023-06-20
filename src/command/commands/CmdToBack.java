@@ -2,6 +2,7 @@ package command.commands;
 
 import command.Command;
 import model.service.IShapeService;
+import model.service.LogService;
 
 public class CmdToBack implements Command {
 	
@@ -21,6 +22,11 @@ public class CmdToBack implements Command {
 	@Override
 	public void unexecute() {
 		service.toFront(shapeId);
+	}
+
+	@Override
+	public String getLog() {
+		return LogService.toBack(shapeId);
 	}
 
 

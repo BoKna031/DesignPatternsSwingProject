@@ -1,4 +1,4 @@
-package geometry;
+package model.entity.geometry;
 import java.io.Serializable;
 
 public abstract class Shape implements Cloneable, Serializable {

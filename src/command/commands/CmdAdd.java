@@ -1,8 +1,9 @@
 package command.commands;
 
 import command.Command;
-import geometry.Shape;
+import model.entity.geometry.Shape;
 import model.service.IShapeService;
+import model.service.LogService;
 
 public class CmdAdd implements Command {
 	
@@ -22,6 +23,11 @@ public class CmdAdd implements Command {
 	@Override
 	public void unexecute() {
 		service.delete(shape.getId());
+	}
+
+	@Override
+	public String getLog() {
+		return LogService.add(shape);
 	}
 
 

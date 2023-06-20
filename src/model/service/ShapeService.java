@@ -1,7 +1,7 @@
 package model.service;
 
-import geometry.Converter;
-import geometry.Shape;
+import model.entity.Converter;
+import model.entity.geometry.Shape;
 import model.repository.*;
 
 import java.io.File;

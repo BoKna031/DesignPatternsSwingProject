@@ -1,6 +1,6 @@
 package view;
 
-import geometry.Shape;
+import model.entity.geometry.Shape;
 
 import java.awt.Graphics;
 

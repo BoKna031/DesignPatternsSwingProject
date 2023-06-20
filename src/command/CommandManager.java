@@ -1,14 +1,15 @@
 package command;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
-import mvc.DrawingFrame;
 
 public class CommandManager {
 	
 	private static CommandManager instance = null;
-	private Stack<Command> stackNormal;
-	private Stack<Command> stackReverse;
-	private DrawingFrame frame;
+	private Stack<Command> executedCommands;
+	private Stack<Command> unexecutedCommands;
+	private List<String> logs;
 
 	public static CommandManager getInstance() {
 		if(instance == null)
@@ -17,50 +18,49 @@ public class CommandManager {
 	}
 	
 	private CommandManager() {
-		stackNormal = new Stack<>();
-		stackReverse = new Stack<>();
-		
+		executedCommands = new Stack<>();
+		unexecutedCommands = new Stack<>();
+		logs = new ArrayList<>();
 	}
 	
 	public void execute(Command command) {
 		command.execute();
-		stackNormal.push(command);
-		stackReverse.clear();
+		logs.add(command.getLog());
+		executedCommands.push(command);
+		unexecutedCommands.clear();
 	}
 	
 	public void undo() {
-		if (!stackNormal.isEmpty()) {
-			Command command = stackNormal.pop();
-			stackReverse.push(command);
-			command.unexecute();
-
-			
-		}
+		if (executedCommands.isEmpty())
+			return;
+		Command command = executedCommands.pop();
+		logs.add(command.getLog() + " - Undo");
+		unexecutedCommands.push(command);
+		command.unexecute();
 	}
 	
 	public void redo() {
-		if(!stackReverse.isEmpty()) {
-			Command command = stackReverse.pop();
-			stackNormal.push(command);
-			command.execute();
-		}
+		if(unexecutedCommands.isEmpty())
+			return;
+		Command command = unexecutedCommands.pop();
+		logs.add(command.getLog() + " - Redo");
+		executedCommands.push(command);
+		command.execute();
+
 	}
 	
 	public void clear() {
-		stackNormal.clear();
-		stackReverse.clear();
+		executedCommands.clear();
+		unexecutedCommands.clear();
+		logs.clear();
 	}
 	
 	public boolean isUndoAvailable() {
-		return stackNormal.size() > 0;
+		return executedCommands.size() > 0;
 	}
 
 	public boolean isRedoAvailable() {
-		return stackReverse.size() > 0;
-	}
-	
-	public void setFrame(DrawingFrame frame) {
-		this.frame = frame;
+		return unexecutedCommands.size() > 0;
 	}
 
 }

@@ -2,6 +2,7 @@ package command.commands;
 
 import command.Command;
 import model.service.IShapeService;
+import model.service.LogService;
 
 public class CmdBringToBack  implements Command {
 	
@@ -22,6 +23,11 @@ public class CmdBringToBack  implements Command {
 	@Override
 	public void unexecute() {
 		service.placeTo(shapeId, oldIndex);
+	}
+
+	@Override
+	public String getLog() {
+		return LogService.bringBack(shapeId);
 	}
 
 

@@ -2,6 +2,7 @@ package command.commands;
 
 import command.Command;
 import model.service.IShapeService;
+import model.service.LogService;
 
 public class CmdBringToFront implements Command {
 
@@ -23,6 +24,11 @@ public class CmdBringToFront implements Command {
 	@Override
 	public void unexecute() {
 		service.placeTo(shapeId, oldIndex);
+	}
+
+	@Override
+	public String getLog() {
+		return LogService.bringFront(shapeId);
 	}
 
 

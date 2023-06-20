@@ -1,6 +1,6 @@
 package dialogs;
 
-import geometry.Circle;
+import model.entity.geometry.Circle;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;

@@ -1,7 +1,7 @@
 package command;
 
 public interface Command {
-	public void execute();
-	public void unexecute();
-
+	void execute();
+	void unexecute();
+	String getLog();
 }

@@ -1,6 +1,6 @@
 package dialogs;
 
-import geometry.Rectangle;
+import model.entity.geometry.Rectangle;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;

@@ -1,6 +1,6 @@
 package model.service;
 
-import geometry.Shape;
+import model.entity.geometry.Shape;
 import model.repository.CRUD;
 
 import java.io.File;

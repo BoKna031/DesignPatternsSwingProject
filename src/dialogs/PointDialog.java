@@ -1,6 +1,6 @@
 package dialogs;
 
-import geometry.Point;
+import model.entity.geometry.Point;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;

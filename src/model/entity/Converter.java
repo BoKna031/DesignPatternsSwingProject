@@ -1,12 +1,14 @@
-package geometry;
+package model.entity;
 
-import java.awt.*;
+import model.entity.geometry.*;
+
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Converter {
-    public static Shape StringToShape(String str){
+    public static model.entity.geometry.Shape StringToShape(String str){
         if(str.contains("Point"))
             return StrToPoint(str);
         if (str.contains("Line"))
@@ -23,14 +25,14 @@ public class Converter {
         return null;
     }
 
-    public static String ShapeToString(Shape shape){
+    public static String ShapeToString(model.entity.geometry.Shape shape){
         switch (shape.getShapeType()){
             case POINT:
-                return PointToStr((Point) shape);
+                return PointToStr((model.entity.geometry.Point) shape);
             case LINE:
                 return LineToStr((Line) shape);
             case RECTANGLE:
-                return RectangleToStr((Rectangle) shape);
+                return RectangleToStr((model.entity.geometry.Rectangle) shape);
             case CIRCLE:
                 return CircleToStr((Circle) shape);
             case DONUT:
@@ -41,19 +43,19 @@ public class Converter {
         return null;
     }
 
-    private static String PointToStr(Point point){
+    private static String PointToStr(model.entity.geometry.Point point){
         String id = point.getId();
         String coordinates = CoordinatesToStr(point);
         String color = ColorToStr(point.getColor());
         return id + ", Point " + coordinates + ", color: " + color;
     }
 
-    private static Shape StrToPoint(String str){
+    private static model.entity.geometry.Shape StrToPoint(String str){
         String id = str.substring(0, str.indexOf(","));
-        Point point = extractCoordinates(str).get(0);
+        model.entity.geometry.Point point = extractCoordinates(str).get(0);
         Color color = extractColors(str).get(0);
 
-        return new Point(id, point.getX(), point.getY(), color);
+        return new model.entity.geometry.Point(id, point.getX(), point.getY(), color);
     }
 
     private static String LineToStr(Line line){
@@ -66,13 +68,13 @@ public class Converter {
         return id + ", Line " + p1_cord + p2_cord + ", color: " + color;
     }
 
-    private static Shape StrToLine(String str){
-        ArrayList<Point> cords = extractCoordinates(str);
+    private static model.entity.geometry.Shape StrToLine(String str){
+        ArrayList<model.entity.geometry.Point> cords = extractCoordinates(str);
         String id = str.substring(0, str.indexOf(","));
         ArrayList<Color> colors = extractColors(str);
         return new Line(id, cords.get(0), cords.get(1), colors.get(0));
     }
-    private static String RectangleToStr(Rectangle rect){
+    private static String RectangleToStr(model.entity.geometry.Rectangle rect){
         String id = rect.getId();
         String point =  CoordinatesToStr(rect.getUpperLeftPoint());
         String innerColor = ColorToStr(rect.getInnerColor());
@@ -83,14 +85,14 @@ public class Converter {
                 ", outerColor: " + outerColor ;
     }
 
-    private static Shape StrToRectangle(String str){
+    private static model.entity.geometry.Shape StrToRectangle(String str){
         String id = str.substring(0, str.indexOf(","));
-        Point p = extractCoordinates(str).get(0);
+        model.entity.geometry.Point p = extractCoordinates(str).get(0);
         ArrayList<Color> colors = extractColors(str);
         int height = Integer.parseInt(extractProperty(str, "height"));
         int width = Integer.parseInt(extractProperty(str, "width"));
 
-        return new Rectangle(id, p,width,height,colors.get(0),colors.get(1));
+        return new model.entity.geometry.Rectangle(id, p,width,height,colors.get(0),colors.get(1));
     }
 
     private static String CircleToStr(Circle circle){
@@ -103,9 +105,9 @@ public class Converter {
                 ", outerColor: " + outerColor ;
     }
 
-    private static Shape StrToCircle(String str){
+    private static model.entity.geometry.Shape StrToCircle(String str){
         String id = str.substring(0, str.indexOf(","));
-        Point center = extractCoordinates(str).get(0);
+        model.entity.geometry.Point center = extractCoordinates(str).get(0);
         ArrayList<Color> colors = extractColors(str);
         int radius = Integer.parseInt(extractProperty(str, "radius"));
         return new Circle(id, center, radius, colors.get(0), colors.get(1));
@@ -122,9 +124,9 @@ public class Converter {
                 donut.getRadius() +", inner color: " + innerColor + ", outer color: " + outerColor ;
     }
 
-    private static Shape StrToDonut(String str){
+    private static model.entity.geometry.Shape StrToDonut(String str){
         String id = str.substring(0, str.indexOf(","));
-        Point center = extractCoordinates(str).get(0);
+        model.entity.geometry.Point center = extractCoordinates(str).get(0);
         int innerRadius = Integer.parseInt(extractProperty(str,"inner radius"));
         int outerRadius = Integer.parseInt(extractProperty(str, "outer radius"));
         ArrayList<Color> colors = extractColors(str);
@@ -133,7 +135,7 @@ public class Converter {
 
     private static String HexagonToStr(HexagonAdapter hexagon){
         String id = hexagon.getId();
-        Point p = new Point(hexagon.getX(), hexagon.getY());
+        model.entity.geometry.Point p = new model.entity.geometry.Point(hexagon.getX(), hexagon.getY());
         String point = CoordinatesToStr(p);
         String innerColor = ColorToStr(hexagon.getInnerColor());
         String outerColor = ColorToStr(hexagon.getOuterColor());
@@ -142,9 +144,9 @@ public class Converter {
                 + innerColor + ", outer color: " + outerColor ;
     }
 
-    private static Shape StrToHexagon(String str){
+    private static model.entity.geometry.Shape StrToHexagon(String str){
         String id = str.substring(0, str.indexOf(","));
-        Point p = extractCoordinates(str).get(0);
+        model.entity.geometry.Point p = extractCoordinates(str).get(0);
         int radius = Integer.parseInt(extractProperty(str, "radius"));
         ArrayList<Color> colors = extractColors(str);
 
@@ -166,15 +168,15 @@ public class Converter {
     }
 
 
-    private static String CoordinatesToStr(Point p){
+    private static String CoordinatesToStr(model.entity.geometry.Point p){
         return "(" + p.getX()+","+p.getY()+")";
     }
 
-    private static Point StrToCoordinate(String str){
+    private static model.entity.geometry.Point StrToCoordinate(String str){
         String[] numbers = str.replaceAll("\\D+", " ").trim().split("\\s+");
         int x = Integer.parseInt(numbers[0]);
         int y = Integer.parseInt(numbers[1]);
-        return new Point(x, y);
+        return new model.entity.geometry.Point(x, y);
     }
 
     private static String ColorToStr(Color color){
@@ -188,7 +190,7 @@ public class Converter {
         int blue = Integer.parseInt(numbers[2]);
         return new Color(red,green,blue);
     }
-    private static ArrayList<Point> extractCoordinates(String str) {
+    private static ArrayList<model.entity.geometry.Point> extractCoordinates(String str) {
         Pattern pointPattern = Pattern.compile("\\((\\d+),(\\d+)\\)");
         Matcher matcher = pointPattern.matcher(str);
         ArrayList<Point> result = new ArrayList<>();

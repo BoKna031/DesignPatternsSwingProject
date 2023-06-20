@@ -2,6 +2,7 @@ package command.commands;
 
 import command.Command;
 import model.service.IShapeService;
+import model.service.LogService;
 
 public class CmdSelect implements Command {
 
@@ -30,6 +31,11 @@ public class CmdSelect implements Command {
 		} catch (NoSuchFieldException e) {
 			e.getMessage();
 		}
+	}
+
+	@Override
+	public String getLog() {
+		return LogService.select(shapeId);
 	}
 
 
