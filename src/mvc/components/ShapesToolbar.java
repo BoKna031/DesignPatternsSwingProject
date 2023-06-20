@@ -1,5 +1,7 @@
 package mvc.components;
 
+import mvc.components.buttons.Icon;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -16,11 +18,11 @@ public class ShapesToolbar extends JPanel {
 
     public ShapesToolbar(Dimension dimension){
         buttons = new ButtonGroup();
-        btnPoint = createToggleButton(Icon.Point, 50, 50);
-        btnLine = createToggleButton(Icon.Line, 50, 50);
-        btnRectangle = createToggleButton(Icon.Rectangle, 70, 70);
-        btnCircle = createToggleButton(Icon.Circle, 50, 50);
-        btnDonut = createToggleButton(Icon.Donut, 70, 70);
+        btnPoint = createToggleButton(mvc.components.buttons.Icon.Point, 50, 50);
+        btnLine = createToggleButton(mvc.components.buttons.Icon.Line, 50, 50);
+        btnRectangle = createToggleButton(mvc.components.buttons.Icon.Rectangle, 70, 70);
+        btnCircle = createToggleButton(mvc.components.buttons.Icon.Circle, 50, 50);
+        btnDonut = createToggleButton(mvc.components.buttons.Icon.Donut, 70, 70);
         btnHex = createToggleButton(Icon.Hexagon, 50, 50);
 
         if(dimension != null)

@@ -1,5 +1,7 @@
 package mvc.components;
 
+import mvc.components.buttons.ColorButton;
+
 import javax.swing.*;
 import java.awt.*;
 

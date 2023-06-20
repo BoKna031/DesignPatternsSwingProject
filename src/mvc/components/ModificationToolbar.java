@@ -2,6 +2,7 @@ package mvc.components;
 
 import mvc.DrawingController;
 import mvc.components.buttons.*;
+import mvc.components.buttons.Icon;
 
 import javax.swing.*;
 import java.awt.*;

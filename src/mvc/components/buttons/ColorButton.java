@@ -1,4 +1,4 @@
-package mvc.components;
+package mvc.components.buttons;
 
 import javax.swing.*;
 import java.awt.*;
