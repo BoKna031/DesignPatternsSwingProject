@@ -62,6 +62,10 @@ public class CommandManager {
 		return null;
 	}
 
+	public List<String> getLogs() {
+		return logs;
+	}
+
 	public boolean isUndoAvailable() {
 		return executedCommands.size() > 0;
 	}
@@ -70,4 +74,8 @@ public class CommandManager {
 		return unexecutedCommands.size() > 0;
 	}
 
+
+	public void setLogs(List<String> logs) {
+		this.logs = logs;
+	}
 }

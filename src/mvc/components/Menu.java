@@ -3,11 +3,13 @@ package mvc.components;
 import mvc.DrawingController;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 public class Menu extends JMenuBar {
     private final JMenu menuFile = new JMenu("File");
@@ -31,7 +33,12 @@ public class Menu extends JMenuBar {
 
         openItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = createChooserDialog("Open",new FileNameExtensionFilter("bin", "bin", "txt"));
+                FileNameExtensionFilter[] filters = {
+                        new FileNameExtensionFilter("Bin", "bin"),
+                        new FileNameExtensionFilter("Txt", "txt")
+                };
+
+                JFileChooser fileChooser = createChooserDialog("Open", List.of(filters));
 
                 int userSelection = fileChooser.showOpenDialog(null);
 
@@ -39,6 +46,7 @@ public class Menu extends JMenuBar {
                     return;
 
                 File fileToLoad = fileChooser.getSelectedFile();
+
                 String filename = fileToLoad.getName();
                 if(getFileExtension(filename).contentEquals("bin")) {
                     try {
@@ -63,12 +71,15 @@ public class Menu extends JMenuBar {
     }
 
     private void saveItem() {
-        JFileChooser fileChooser = createChooserDialog("Save",new FileNameExtensionFilter("Bin", "bin"));
+        JFileChooser fileChooser = createChooserDialog("Save", null);
+
         int userSelection = fileChooser.showSaveDialog(null);
 
         if(userSelection != JFileChooser.APPROVE_OPTION)
             return;
 
+        FileFilter fileFilter = fileChooser.getFileFilter();
+        System.out.println(fileFilter.getDescription());
         saveFile(fileChooser.getSelectedFile());
     }
 
@@ -84,13 +95,20 @@ public class Menu extends JMenuBar {
         return true;
     }
 
-    private JFileChooser createChooserDialog(String dialogName, FileNameExtensionFilter filter) {
+    private JFileChooser createChooserDialog(String dialogName, List<FileNameExtensionFilter> filters) {
         JFileChooser fileChooser = new JFileChooser();
-        if(filter != null)
-            fileChooser.setFileFilter(filter);
+        configureFilters(fileChooser, filters);
         if(dialogName != null)
             fileChooser.setDialogTitle(dialogName);
         return fileChooser;
+    }
+
+    private void configureFilters(JFileChooser fileChooser, List<FileNameExtensionFilter> filters){
+        if(filters == null || fileChooser == null)
+            return;
+        for(FileNameExtensionFilter filter: filters){
+            fileChooser.addChoosableFileFilter(filter);
+        }
     }
 
     private String getFileExtension(String filename){

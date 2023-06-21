@@ -9,13 +9,12 @@ public enum LogType {
     TO_FRONT("To front"),
     TO_BACK("To back"),
     BRING_BACK("Bring back"),
-    BRING_FRONT("Bring front");
+    BRING_FRONT("Bring front"),
+    UNDO("Undo"),
+    REDO("Redo");
+    private final String additionalValue;
 
-
-
-    private String additionalValue;
-
-    private LogType(String additionalValue) {
+    LogType(String additionalValue) {
         this.additionalValue = additionalValue;
     }
 

@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 import command.CommandManager;
@@ -17,9 +18,10 @@ import command.commands.CmdSelect;
 import command.commands.CmdToBack;
 import command.commands.CmdToFront;
 import model.entity.Converter;
+import model.entity.LogType;
 import model.entity.geometry.*;
+import model.service.FileService;
 import model.service.IShapeService;
-import model.service.ShapeService;
 import mvc.components.buttons.ButtonType;
 import observer.Observer;
 import observer.ObserverUpdate;
@@ -83,7 +85,7 @@ public class DrawingController {
 
 	public void delete(){
 		for(Shape s: shapeService.getSelected()){
-			CmdRemove cmdRemove = new CmdRemove(shapeService, s);
+			CmdRemove cmdRemove = new CmdRemove(shapeService, s.getId());
 			commandManager.execute(cmdRemove);
 			frame.appendLog(commandManager.getLastLog());
 		}
@@ -224,7 +226,10 @@ public class DrawingController {
 	}
 	
 	public void save(File file) throws IOException {
-			shapeService.saveToFile(file);
+		File binFile = new File(file + ".bin");
+		shapeService.saveToFile(binFile);
+		File logFile = new File(file + ".txt");
+		FileService.save(logFile, CommandManager.getInstance().getLogs());
 	}
 
 	public void load(File fileToLoad) throws ClassNotFoundException, IOException {
@@ -235,11 +240,13 @@ public class DrawingController {
 		frame.enableButton(ButtonType.UNDO, false);
 		frame.enableButton(ButtonType.REDO, false);
 
-		frame.updateView();
-
-		for(String log: shapeService.getAllLogs()){
-			frame.appendLog(log); //TODO
+		File logFile = FileService.changeFileExtension(fileToLoad,"txt");
+		List<String> logs = (List<String>) FileService.load(logFile);
+		CommandManager.getInstance().setLogs(logs);
+		for(String log: logs){
+			frame.appendLog(log);
 		}
+		frame.updateView();
 	}
 	
 	public void loadOneByOne(File file) throws IOException {
@@ -254,10 +261,8 @@ public class DrawingController {
 		frame.updateView();
 
 		try {
-			ShapeService tempService = new ShapeService();
-			tempService.readFromFile(file);
-
-			temporarilyLogs = new LinkedList<>(tempService.getAllLogs());
+			List<String> logs = (List<String>) FileService.load(file);
+			temporarilyLogs = new LinkedList<>(logs);
 		}catch (IOException | ClassNotFoundException e){
 			e.printStackTrace();
 		}
@@ -270,46 +275,45 @@ public class DrawingController {
 			return;
 		}
 		Shape shape;
-		if (line.contains("Undo")) {
+		if (line.contains(LogType.UNDO.toString())) {
 			commandManager.undo();
 			notifyAllObservers(shapeService.getSelected().size());
-		} else if (line.contains("RedoButton")) {
+		} else if (line.contains(LogType.REDO.toString())) {
 			commandManager.redo();
 			notifyAllObservers(shapeService.getSelected().size());
-		} else if (line.contains("To Front")) {
-			shape = Converter.StringToShape(line);
-			CmdToFront cmd = new CmdToFront(shapeService,shape.getId());
+		} else if (line.contains(LogType.TO_FRONT.toString())) {
+			String shapeId = line.split(" - ")[0];
+			CmdToFront cmd = new CmdToFront(shapeService, shapeId);
 			commandManager.execute(cmd);
 			frame.enableButton(ButtonType.UNDO, true);
 			frame.enableButton(ButtonType.REDO, false);
-		} else if (line.contains("To Back")) {
-			shape = Converter.StringToShape(line);
-			CmdToBack cmd = new CmdToBack(shapeService,shape.getId());
+		} else if (line.contains(LogType.TO_BACK.toString())) {
+			String shapeId = line.split(" - ")[0];
+			CmdToBack cmd = new CmdToBack(shapeService, shapeId);
 			commandManager.execute(cmd);
 
 			frame.enableButton(ButtonType.UNDO, true);
 			frame.enableButton(ButtonType.REDO, false);
-		} else if (line.contains("Bring Front")) {
-			shape = Converter.StringToShape(line);
-			CmdBringToFront cmd = new CmdBringToFront(shapeService,shape.getId());
+		} else if (line.contains(LogType.BRING_FRONT.toString())) {
+			String shapeId = line.split(" - ")[0];
+			CmdBringToFront cmd = new CmdBringToFront(shapeService, shapeId);
 			commandManager.execute(cmd);
 			frame.enableButton(ButtonType.UNDO, true);
 			frame.enableButton(ButtonType.REDO, false);
-		} else if (line.contains("Bring Back")) {
-			shape = Converter.StringToShape(line);
-			CmdBringToBack cmd = new CmdBringToBack(shapeService,shape.getId());
+		} else if (line.contains(LogType.BRING_BACK.toString())) {
+			String shapeId = line.split(" - ")[0];
+			CmdBringToBack cmd = new CmdBringToBack(shapeService, shapeId);
 			commandManager.execute(cmd);
 			frame.enableButton(ButtonType.UNDO, true);
 			frame.enableButton(ButtonType.REDO, false);
-		} else if (line.contains("Add")) {
-			line = line.replaceAll(" - Add", "");
+		} else if (line.contains(LogType.ADD.toString())) {
 			shape = Converter.StringToShape(line);
 			CmdAdd cmd = new CmdAdd(shapeService,shape);
 			commandManager.execute(cmd);
 			frame.enableButton(ButtonType.UNDO, true);
 			frame.enableButton(ButtonType.REDO, false);
 
-		} else if (line.contains("Modify to")) {
+		} else if (line.contains(LogType.MODIFY_TO.toString())) {
 			String[] shapeDescriptions = line.split(",Modify to ");
 			Shape oldShape = Converter.StringToShape(shapeDescriptions[0]);
 			shape = Converter.StringToShape(shapeDescriptions[1]);
@@ -319,23 +323,23 @@ public class DrawingController {
 			frame.enableButton(ButtonType.UNDO, true);
 			frame.enableButton(ButtonType.REDO, false);
 				
-		} else if (line.contains("Deleted")) {
-			shape = Converter.StringToShape(line);
-			CmdRemove cmdDelete = new CmdRemove(shapeService, shape);
-			commandManager.execute(cmdDelete);
+		} else if (line.contains(LogType.REMOVE.toString())) {
+			String shapeId = line.split(" - ")[0];
+			CmdRemove cmdRemove = new CmdRemove(shapeService, shapeId);
+			commandManager.execute(cmdRemove);
 			frame.enableButton(ButtonType.UNDO, true);
 			frame.enableButton(ButtonType.REDO, false);
-		} else if (line.contains("Selected")) {
-			shape = Converter.StringToShape(line);
-			CmdSelect cmdSelect = new CmdSelect(shapeService, shape.getId());
+		} else if (line.contains(LogType.SELECT.toString())) {
+			String shapeId = line.split(" - ")[0];
+			CmdSelect cmdSelect = new CmdSelect(shapeService, shapeId);
 			commandManager.execute(cmdSelect);
 
 			notifyAllObservers(shapeService.getSelected().size());
 			frame.enableButton(ButtonType.UNDO, true);
 			frame.enableButton(ButtonType.REDO, false);
-		} else if (line.contains("Deselected")) {
-			shape = Converter.StringToShape(line);
-			CmdDeselect cmdDeselect = new CmdDeselect(shapeService, shape.getId());
+		} else if (line.contains(LogType.DESELECT.toString())) {
+			String shapeId = line.split(" - ")[0];
+			CmdDeselect cmdDeselect = new CmdDeselect(shapeService, shapeId);
 			commandManager.execute(cmdDeselect);
 
 			notifyAllObservers(shapeService.getSelected().size());

@@ -7,28 +7,28 @@ import model.service.LogService;
 
 public class CmdRemove implements Command {
 
-	private IShapeService service;
-	private Shape shape;
+	private final IShapeService service;
+	private final String shapeId;
+	private Shape oldShape;
 	
-	
-	public CmdRemove(IShapeService service, Shape shape) {
+	public CmdRemove(IShapeService service, String shapeId) {
 		this.service = service;
-		this.shape = shape;
+		this.shapeId = shapeId;
 	}
 	
 	@Override
 	public void execute() {
-		service.delete(shape.getId());
+		oldShape = service.delete(shapeId);
 	}
 	
 	@Override
 	public void unexecute() {
-		service.create(shape);
+		service.create(oldShape);
 	}
 
 	@Override
 	public String getLog() {
-		return LogService.remove(shape.getId());
+		return LogService.remove(shapeId);
 	}
 
 

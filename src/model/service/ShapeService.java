@@ -1,6 +1,4 @@
 package model.service;
-
-import model.entity.Converter;
 import model.entity.geometry.Shape;
 import model.repository.*;
 
@@ -8,32 +6,19 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public class ShapeService implements IShapeService{
-
-    IFileManager fileManager;
-    ILogRepository logRepository;
     IShapeRepository shapeRepository;
-
     ILayerRepository layerRepository;
 
     public ShapeService(){
-        logRepository = new LogRepository();
         shapeRepository = new ShapeRepository();
-        fileManager = new FileManager(shapeRepository,logRepository);
         layerRepository = new LayerRepository();
-    }
-    public ShapeService(IShapeRepository shapeRepository, ILogRepository logRepository){
-        fileManager = new FileManager(shapeRepository, logRepository);
-        this.logRepository = logRepository;
-        this.shapeRepository = shapeRepository;
     }
     @Override
     public Shape create(Shape entity) {
         Shape createdShape = shapeRepository.create(entity);
         if(createdShape != null) {
-            logRepository.addLog(Converter.ShapeToString(entity) + " - Add");
             layerRepository.add(createdShape.getId());
         }
         return createdShape;
@@ -51,7 +36,6 @@ public class ShapeService implements IShapeService{
             return null;
         entity.setSelected(oldShape.isSelected());
         shapeRepository.update(entity);
-        logRepository.addLog(Converter.ShapeToString(oldShape) + ",Modify to " + Converter.ShapeToString(entity));
         return entity;
     }
 
@@ -59,7 +43,6 @@ public class ShapeService implements IShapeService{
     public Shape delete(String id) {
         Shape deletedShape = shapeRepository.delete(id);
         if(deletedShape != null) {
-            logRepository.addLog(Converter.ShapeToString(deletedShape) + " - Deleted");
             layerRepository.delete(id);
         }
         return deletedShape;
@@ -67,15 +50,16 @@ public class ShapeService implements IShapeService{
 
     @Override
     public void readFromFile(File file) throws ClassNotFoundException, IOException{
-        fileManager.readFromFile(file);
-        for(Shape sh: shapeRepository.getAll()){
-            layerRepository.add(sh.getId());
+        Collection<Shape> shapes = (Collection<Shape>) FileService.load(file);
+        for(Shape sh: shapes){
+            Shape shape = shapeRepository.create(sh);
+            layerRepository.add(shape.getId());
         }
     }
 
     @Override
     public void saveToFile(File file) throws IOException {
-        fileManager.saveToFile(file);
+        FileService.save(file, getAll());
     }
 
     @Override
@@ -86,20 +70,6 @@ public class ShapeService implements IShapeService{
         }
         return result;
     }
-    
-    @Override
-    public List<String> getAllLogs() {
-        return logRepository.getAllLogs();
-    }
-
-    @Override
-    public String getLastLog() {
-        List<String> logs = getAllLogs();
-        if (!logs.isEmpty()){
-            return logs.get(logs.size() - 1);
-        }
-        return null;
-    }
 
     @Override
     public void select(String id) throws NoSuchFieldException {
@@ -108,7 +78,6 @@ public class ShapeService implements IShapeService{
             throw new NoSuchFieldException("Shape with id " + id + " doesn't exists");
         if(!shape.isSelected()){
             shape.setSelected(true);
-            logRepository.addLog(Converter.ShapeToString(shape)  + " - Selected");
         }
     }
 
@@ -119,7 +88,6 @@ public class ShapeService implements IShapeService{
             throw new NoSuchFieldException("Shape with id " + id + " doesn't exists");
         if(shape.isSelected()){
             shape.setSelected(false);
-            logRepository.addLog(Converter.ShapeToString(shape)  + " - Deselected");
         }
     }
 
@@ -135,30 +103,22 @@ public class ShapeService implements IShapeService{
 
     @Override
     public int toFront(String shapeId) {
-        int result = layerRepository.toFront(shapeId);
-        logRepository.addLog(Converter.ShapeToString(read(shapeId))  + " - To Front");
-        return result;
+        return layerRepository.toFront(shapeId);
     }
 
     @Override
     public int toBack(String shapeId) {
-        int result = layerRepository.toBack(shapeId);
-        logRepository.addLog(Converter.ShapeToString(read(shapeId))  + " - To Back");
-        return  result;
+        return layerRepository.toBack(shapeId);
     }
 
     @Override
     public int bringBack(String shapeId) {
-        int result = layerRepository.bringBack(shapeId);
-        logRepository.addLog(Converter.ShapeToString(read(shapeId))  + " - Bring Back");
-        return result;
+        return layerRepository.bringBack(shapeId);
     }
 
     @Override
     public int bringFront(String shapeId) {
-        int result = layerRepository.bringFront(shapeId);
-        logRepository.addLog(Converter.ShapeToString(read(shapeId))  + " - Bring Front");
-        return result;
+        return layerRepository.bringFront(shapeId);
     }
 
     @Override
